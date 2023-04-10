@@ -1622,10 +1622,10 @@ pututxline (const struct utmpx *ut)
         default:
             g_string_append_printf (status, " TYPE=%d", ut->ut_type);
         }
-        g_string_append_printf (status, " LINE=%s", ut->ut_line);
-        g_string_append_printf (status, " ID=%s", ut->ut_id);
-        g_string_append_printf (status, " USER=%s", ut->ut_user);
-        g_string_append_printf (status, " HOST=%s", ut->ut_host);
+        g_string_append_printf (status, " LINE=%.*s", (int) sizeof (ut->ut_line), ut->ut_line);
+        g_string_append_printf (status, " ID=%.*s", (int) sizeof (ut->ut_id), ut->ut_id);
+        g_string_append_printf (status, " USER=%.*s", (int) sizeof (ut->ut_user), ut->ut_user);
+        g_string_append_printf (status, " HOST=%.*s", (int) sizeof (ut->ut_host), ut->ut_host);
         status_notify ("%s", status->str);
     }
 
@@ -1662,14 +1662,10 @@ updwtmp (const char *wtmp_file, const struct utmp *ut)
         default:
             g_string_append_printf (status, " TYPE=%d", ut->ut_type);
         }
-        if (ut->ut_line)
-            g_string_append_printf (status, " LINE=%s", ut->ut_line);
-        if (ut->ut_id)
-            g_string_append_printf (status, " ID=%s", ut->ut_id);
-        if (ut->ut_user)
-            g_string_append_printf (status, " USER=%s", ut->ut_user);
-        if (ut->ut_host)
-            g_string_append_printf (status, " HOST=%s", ut->ut_host);
+        g_string_append_printf (status, " LINE=%.*s", (int) sizeof (ut->ut_line), ut->ut_line);
+        g_string_append_printf (status, " ID=%.*s", (int) sizeof (ut->ut_id), ut->ut_id);
+        g_string_append_printf (status, " USER=%.*s", (int) sizeof (ut->ut_user), ut->ut_user);
+        g_string_append_printf (status, " HOST=%.*s", (int) sizeof (ut->ut_host), ut->ut_host);
         status_notify ("%s", status->str);
     }
 }

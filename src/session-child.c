@@ -205,14 +205,10 @@ lightdm_updwtmpx (const gchar *wtmp_file, struct utmpx *ut)
     memset (&u, 0, sizeof (u));
     u.ut_type = ut->ut_type;
     u.ut_pid = ut->ut_pid;
-    if (ut->ut_line)
-        strncpy (u.ut_line, ut->ut_line, sizeof (u.ut_line));
-    if (ut->ut_id)
-        strncpy (u.ut_id, ut->ut_id, sizeof (u.ut_id));
-    if (ut->ut_user)
-        strncpy (u.ut_user, ut->ut_user, sizeof (u.ut_user));
-    if (ut->ut_host)
-        strncpy (u.ut_host, ut->ut_host, sizeof (u.ut_host));
+    strncpy (u.ut_line, ut->ut_line, sizeof (u.ut_line));
+    strncpy (u.ut_id, ut->ut_id, sizeof (u.ut_id));
+    strncpy (u.ut_user, ut->ut_user, sizeof (u.ut_user));
+    strncpy (u.ut_host, ut->ut_host, sizeof (u.ut_host));
     u.ut_tv.tv_sec = ut->ut_tv.tv_sec;
     u.ut_tv.tv_usec = ut->ut_tv.tv_usec;
 
