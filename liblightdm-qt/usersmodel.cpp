@@ -29,9 +29,9 @@ public:
     QString session;
     bool isLoggedIn;
     bool hasMessages;
+    bool isLocked;
     quint64 uid;
     QString displayName() const;
-    bool isLocked;
 };
 
 QString UserItem::displayName() const {
