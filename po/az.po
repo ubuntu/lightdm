@@ -1,7 +1,7 @@
 # Azerbaijani translation for lightdm
 # Copyright (c) 2012 Rosetta Contributors and Canonical Ltd 2012
 # This file is distributed under the same license as the lightdm package.
-# Osman Karimli <osman.kerimli02@gmail.com>, 2022.
+# Osman Karimli <osman.kerimli02@gmail.com>, 2025.
 #
 msgid ""
 msgstr ""
