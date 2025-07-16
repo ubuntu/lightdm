@@ -1,15 +1,15 @@
 # Azerbaijani translation for lightdm
 # Copyright (c) 2012 Rosetta Contributors and Canonical Ltd 2012
 # This file is distributed under the same license as the lightdm package.
-# Osman Kerimli <osman.kerimli02@gmail.com>, 2018.
+# Osman Karimli <osman.kerimli02@gmail.com>, 2022.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: lightdm\n"
-"Report-Msgid-Bugs-To: Osman Kerimli <osman.kerimli02@gmail.com>\n"
+"Report-Msgid-Bugs-To: Osman Karimli <osman.kerimli02@gmail.com>\n"
 "POT-Creation-Date: 2010-12-06 11:05+0000\n"
-"PO-Revision-Date: 2018-12-18 00:11+0000\n"
-"Last-Translator: Osman Kerimli <osman.kerimli02@gmail.com>\n"
+"PO-Revision-Date: 2025-07-16 22:08+0000\n"
+"Last-Translator: Osman Karimli <osman.kerimli02@gmail.com>\n"
 "Language-Team: Azerbaijani <az@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -28,7 +28,7 @@ msgstr "Ləğv et"
 
 #: ../greeters/gtk/lightdm-gtk-greeter.c:410
 msgid "Restart"
-msgstr "Yenidən başlat"
+msgstr "Yenidən başladın"
 
 #: ../greeters/gtk/lightdm-gtk-greeter.c:434
 msgid ""
@@ -38,7 +38,7 @@ msgstr ""
 
 #: ../greeters/gtk/lightdm-gtk-greeter.c:435
 msgid "Shutdown"
-msgstr "Söndür"
+msgstr "Söndürün"
 
 #: ../greeters/gtk/greeter.ui.h:4
 msgid "Large Font"
@@ -58,7 +58,7 @@ msgstr "Dil"
 
 #: ../greeters/ldm-gtk-greeter.c:646
 msgid "Keyboard Layout"
-msgstr "Klaviatura tərtibatı"
+msgstr "Klaviatura düzülüşü"
 
 #: ../greeters/ldm-gtk-greeter.c:668
 msgid "Session"
@@ -66,7 +66,7 @@ msgstr "Sessiya"
 
 #: ../greeters/gtk/greeter.ui.h:8
 msgid "Suspend"
-msgstr "Dayandır"
+msgstr "Yuxu"
 
 #: ../greeters/gtk/greeter.ui.h:2
 msgid "Hibernate"
@@ -74,11 +74,11 @@ msgstr "Qış yuxusu"
 
 #: ../greeters/gtk/greeter.ui.h:6
 msgid "Restart..."
-msgstr "Yenidən başlat..."
+msgstr "Yenidən başladın..."
 
 #: ../greeters/gtk/greeter.ui.h:7
 msgid "Shutdown..."
-msgstr "Söndür..."
+msgstr "Söndürün..."
 
 #. Description on how to use Light Display Manager displayed on command-line
 #: ../src/lightdm.c:100
@@ -87,8 +87,8 @@ msgid ""
 "Usage:\n"
 "  %s - Display Manager"
 msgstr ""
-"İstifadə:\n"
-"  %s - Displey Menecer"
+"İstifadə qaydası:\n"
+"  %s - Ekran Meneceri"
 
 #. Description on how to use Light Display Manager displayed on command-line
 #: ../src/lightdm.c:106
@@ -103,9 +103,9 @@ msgid ""
 "  -h, --help                      Show help options"
 msgstr ""
 "Kömək Seçimləri:\n"
-"  -c, --config <file>             Konfiqurasiya faylı istifadə et\n"
-"      --pid-file <file>           PID-i yazmaq üçün fayl\n"
-"  -d, --debug                     Xəta arıdıcı mesajlarını dərc et\n"
-"      --test-mode                 İmtiyazsız istifadəçi kimi başlat\n"
-"  -v, --version                   Buraxılış versiyasını göstər\n"
+"  -c, --config <file>             Konfiqurasiya faylını istifadə et\n"
+"      --pid-file <file>           PID-in yazılacağı fayl\n"
+"  -d, --debug                     Sazlama mesajlarını çap et\n"
+"      --test-mode                 İmtiyazsız istifadəçi kimi işlət\n"
+"  -v, --version                   Versiyanı göstər\n"
 "  -h, --help                      Kömək seçimlərini göstər"
