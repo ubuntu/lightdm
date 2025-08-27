@@ -656,14 +656,14 @@ session_child_run (int argc, char **argv)
         if (setsid () < 0)
             _exit (errno);
 
+        extern char **environ;
+        environ = pam_getenvlist (pam_handle);
 #if HAVE_SETUSERCONTEXT
         /* Setup user context
         * Reset the current environment to what is in the PAM context,
         * then setusercontext will add to it as necessary as there is no
         * option for setusercontext to add to a PAM context.
         */
-        extern char **environ;
-        environ = pam_getenvlist (pam_handle);
         struct passwd* pwd = getpwnam (username);
         if (pwd) {
             if (setusercontext (NULL, pwd, pwd->pw_uid, LOGIN_SETALL) < 0) {
@@ -711,14 +711,12 @@ session_child_run (int argc, char **argv)
         /* Reset SIGPIPE handler so the child has default behaviour (we disabled it at LightDM start) */
         signal (SIGPIPE, SIG_DFL);
 
+        /* End PAM session with DATA_SILENT
+         * To notify PAM modules (e.g. pam_cap) of transaction termination */
+        (void) pam_end(pam_handle, PAM_SUCCESS | PAM_DATA_SILENT);
+
         /* Run the command */
-        execve (command_argv[0], command_argv,
-#if HAVE_SETUSERCONTEXT
-            environ
-#else
-            pam_getenvlist (pam_handle)
-#endif
-        );
+        execve (command_argv[0], command_argv, environ);
         _exit (EXIT_FAILURE);
     }
 
