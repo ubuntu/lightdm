@@ -373,7 +373,11 @@ got_signal_cb (Process *process, int signum, XServerLocal *server)
         l_debug (server, "Got signal from X server :%d", priv->display_number);
 
         // FIXME: Check return value
-        DISPLAY_SERVER_CLASS (x_server_local_parent_class)->start (DISPLAY_SERVER (server));
+        gboolean start_result = DISPLAY_SERVER_CLASS (x_server_local_parent_class)->start (DISPLAY_SERVER (server));
+        if (!start_result) {
+            priv->got_signal = FALSE;
+            l_debug (server, "X service start failed for rewait signal");
+        }
     }
 }
 
