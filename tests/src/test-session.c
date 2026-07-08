@@ -28,6 +28,123 @@ static xcb_connection_t *connection;
 static LightDMGreeter *greeter = NULL;
 
 static gboolean
+read_card16 (const guint8 *data, gsize data_length, gsize *offset, guint16 *value)
+{
+    if (*offset + 2 > data_length)
+        return FALSE;
+
+    *value = data[*offset] << 8 | data[*offset + 1];
+    *offset += 2;
+
+    return TRUE;
+}
+
+static gboolean
+read_xauthority_data (const guint8 *data, gsize data_length, gsize *offset, const guint8 **value, guint16 *value_length)
+{
+    if (!read_card16 (data, data_length, offset, value_length) ||
+        *offset + *value_length > data_length)
+        return FALSE;
+
+    *value = data + *offset;
+    *offset += *value_length;
+
+    return TRUE;
+}
+
+typedef struct
+{
+    guint16 family;
+    const guint8 *address;
+    guint16 address_length;
+    const guint8 *number;
+    guint16 number_length;
+    const guint8 *authorization_name;
+    guint16 authorization_name_length;
+    const guint8 *authorization_data;
+    guint16 authorization_data_length;
+} XAuthorityRecordView;
+
+static gboolean
+read_xauthority_record (const guint8 *data, gsize data_length, gsize *offset, XAuthorityRecordView *record)
+{
+    return read_card16 (data, data_length, offset, &record->family) &&
+           read_xauthority_data (data, data_length, offset, &record->address, &record->address_length) &&
+           read_xauthority_data (data, data_length, offset, &record->number, &record->number_length) &&
+           read_xauthority_data (data, data_length, offset, &record->authorization_name, &record->authorization_name_length) &&
+           read_xauthority_data (data, data_length, offset, &record->authorization_data, &record->authorization_data_length);
+}
+
+static gboolean
+xauthority_data_matches (const guint8 *value, guint16 value_length, const guint8 *expected, gsize expected_length)
+{
+    return value_length == expected_length && memcmp (value, expected, expected_length) == 0;
+}
+
+static gboolean
+xauthority_string_matches (const guint8 *value, guint16 value_length, const gchar *expected)
+{
+    return xauthority_data_matches (value, value_length, (const guint8 *) expected, strlen (expected));
+}
+
+static gboolean
+summarize_stale_xauthority (const gchar *filename, gint *record_count, gint *matching_count, gint *stale_count, gint *unrelated_count)
+{
+    const guint8 stale_cookie[16] = {
+        0x00, 0x01, 0x02, 0x03,
+        0x04, 0x05, 0x06, 0x07,
+        0x08, 0x09, 0x0A, 0x0B,
+        0x0C, 0x0D, 0x0E, 0x0F
+    };
+    const guint8 unrelated_cookie[16] = {
+        0xF0, 0xF1, 0xF2, 0xF3,
+        0xF4, 0xF5, 0xF6, 0xF7,
+        0xF8, 0xF9, 0xFA, 0xFB,
+        0xFC, 0xFD, 0xFE, 0xFF
+    };
+    g_autofree guint8 *data = NULL;
+    gsize data_length = 0;
+    if (!g_file_get_contents (filename, (gchar **) &data, &data_length, NULL))
+        return FALSE;
+
+    *record_count = 0;
+    *matching_count = 0;
+    *stale_count = 0;
+    *unrelated_count = 0;
+
+    gsize offset = 0;
+    while (offset < data_length)
+    {
+        XAuthorityRecordView record;
+        if (!read_xauthority_record (data, data_length, &offset, &record))
+            return FALSE;
+
+        (*record_count)++;
+
+        gboolean matching_record = record.family == 256 &&
+                                   xauthority_string_matches (record.address, record.address_length, "lightdm-test") &&
+                                   xauthority_string_matches (record.number, record.number_length, "0") &&
+                                   xauthority_string_matches (record.authorization_name, record.authorization_name_length, "MIT-MAGIC-COOKIE-1");
+        if (matching_record)
+        {
+            (*matching_count)++;
+            if (xauthority_data_matches (record.authorization_data, record.authorization_data_length, stale_cookie, sizeof (stale_cookie)))
+                (*stale_count)++;
+        }
+
+        gboolean unrelated_record = record.family == 256 &&
+                                    xauthority_string_matches (record.address, record.address_length, "stale-host") &&
+                                    xauthority_string_matches (record.number, record.number_length, "9") &&
+                                    xauthority_string_matches (record.authorization_name, record.authorization_name_length, "MIT-MAGIC-COOKIE-1") &&
+                                    xauthority_data_matches (record.authorization_data, record.authorization_data_length, unrelated_cookie, sizeof (unrelated_cookie));
+        if (unrelated_record)
+            (*unrelated_count)++;
+    }
+
+    return TRUE;
+}
+
+static gboolean
 sigint_cb (gpointer user_data)
 {
     status_notify ("%s TERMINATE SIGNAL=%d", session_id, SIGINT);
@@ -191,6 +308,22 @@ request_cb (const gchar *name, GHashTable *params)
         g_string_append_c (mode_string, file_info.st_mode & S_IWOTH ? 'w' : '-');
         g_string_append_c (mode_string, file_info.st_mode & S_IXOTH ? 'x' : '-');
         status_notify ("%s CHECK-X-AUTHORITY MODE=%s", session_id, mode_string->str);
+    }
+
+    else if (strcmp (name, "CHECK-X-AUTHORITY-RECORDS") == 0)
+    {
+        g_autofree gchar *xauthority = g_strdup (g_getenv ("XAUTHORITY"));
+        if (!xauthority)
+            xauthority = g_build_filename (g_get_home_dir (), ".Xauthority", NULL);
+
+        gint record_count;
+        gint matching_count;
+        gint stale_count;
+        gint unrelated_count;
+        if (summarize_stale_xauthority (xauthority, &record_count, &matching_count, &stale_count, &unrelated_count))
+            status_notify ("%s CHECK-X-AUTHORITY-RECORDS RECORDS=%d MATCHING=%d STALE=%d UNRELATED=%d", session_id, record_count, matching_count, stale_count, unrelated_count);
+        else
+            status_notify ("%s CHECK-X-AUTHORITY-RECORDS ERROR=INVALID", session_id);
     }
 
     else if (strcmp (name, "WRITE-SHARED-DATA") == 0)

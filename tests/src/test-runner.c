@@ -2515,6 +2515,61 @@ cp (GFile *src, GFile *dst)
         g_error ("Failed to copy %s to %s: %s", g_file_peek_path (s), g_file_peek_path (d), error->message);
 }
 
+static void
+append_card16 (GString *data, guint16 value)
+{
+    g_string_append_c (data, value >> 8);
+    g_string_append_c (data, value & 0xFF);
+}
+
+static void
+append_xauthority_data (GString *data, const guint8 *value, guint16 value_length)
+{
+    append_card16 (data, value_length);
+    g_string_append_len (data, (const gchar *) value, value_length);
+}
+
+static void
+append_xauthority_string (GString *data, const gchar *value)
+{
+    append_xauthority_data (data, (const guint8 *) value, strlen (value));
+}
+
+static void
+append_xauthority_record (GString *data, guint16 family, const gchar *address, const gchar *number, const guint8 *cookie)
+{
+    append_card16 (data, family);
+    append_xauthority_string (data, address);
+    append_xauthority_string (data, number);
+    append_xauthority_string (data, "MIT-MAGIC-COOKIE-1");
+    append_xauthority_data (data, cookie, 16);
+}
+
+static void
+write_stale_xauthority (const gchar *path)
+{
+    const guint8 stale_cookie[16] = {
+        0x00, 0x01, 0x02, 0x03,
+        0x04, 0x05, 0x06, 0x07,
+        0x08, 0x09, 0x0A, 0x0B,
+        0x0C, 0x0D, 0x0E, 0x0F
+    };
+    const guint8 other_cookie[16] = {
+        0xF0, 0xF1, 0xF2, 0xF3,
+        0xF4, 0xF5, 0xF6, 0xF7,
+        0xF8, 0xF9, 0xFA, 0xFB,
+        0xFC, 0xFD, 0xFE, 0xFF
+    };
+
+    g_autoptr(GString) data = g_string_new ("");
+    append_xauthority_record (data, 256, "lightdm-test", "0", stale_cookie);
+    append_xauthority_record (data, 256, "lightdm-test", "0", stale_cookie);
+    append_xauthority_record (data, 256, "stale-host", "9", other_cookie);
+
+    g_file_set_contents (path, data->str, data->len, NULL);
+    chmod (path, S_IRUSR | S_IWUSR);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -2774,6 +2829,8 @@ main (int argc, char **argv)
         {"prop-user",        "",          "TEST",               1033},
         /* This account has the home directory changed by PAM during authentication */
         {"change-home-dir",    "",       "Change Home Dir User", 1034},
+        /* This account has an existing stale X authority */
+        {"stale-xauth",      "password",  "Stale Xauthority",   1035},
         {NULL,               NULL,        NULL,                    0}
     };
     g_autoptr(GString) passwd_data = g_string_new ("");
@@ -2826,6 +2883,13 @@ main (int argc, char **argv)
             gchar data[1] = { 0xFF };
             g_file_set_contents (path, data, 1, NULL);
             chmod (path, S_IRUSR | S_IWUSR);
+        }
+
+        /* Write stale X authority file */
+        if (strcmp (users[i].user_name, "stale-xauth") == 0)
+        {
+            g_autofree gchar *path = g_build_filename (home_dir, users[i].user_name, ".Xauthority", NULL);
+            write_stale_xauthority (path);
         }
 
         /* Add passwd file entry */
