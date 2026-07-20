@@ -128,6 +128,7 @@ typedef struct
     gchar *path;
     gboolean can_graphical;
     gboolean can_multi_session;
+    gboolean can_tty;
     gchar *active_session;
 } Login1Seat;
 
@@ -1555,6 +1556,8 @@ handle_login1_seat_get_property (GDBusConnection       *connection,
         return g_variant_new_boolean (seat->can_graphical);
     else if (strcmp (property_name, "CanMultiSession") == 0)
         return g_variant_new_boolean (seat->can_multi_session);
+    else if (strcmp (property_name, "CanTTY") == 0)
+        return g_variant_new_boolean (seat->can_tty);
     else if (strcmp (property_name, "Id") == 0)
         return g_variant_new_string (seat->id);
     else if (strcmp (property_name, "ActiveSession") == 0)
@@ -1580,6 +1583,7 @@ add_login1_seat (GDBusConnection *connection, const gchar *id, gboolean emit_sig
     seat->path = g_strdup_printf ("/org/freedesktop/login1/seat/%s", seat->id);
     seat->can_graphical = TRUE;
     seat->can_multi_session = TRUE;
+    seat->can_tty = TRUE;
     seat->active_session = NULL;
 
     const gchar *login1_seat_interface =
@@ -1587,6 +1591,7 @@ add_login1_seat (GDBusConnection *connection, const gchar *id, gboolean emit_sig
         "  <interface name='org.freedesktop.login1.Seat'>"
         "    <property name='CanGraphical' type='b' access='read'/>"
         "    <property name='CanMultiSession' type='b' access='read'/>"
+        "    <property name='CanTTY' type='b' access='read'/>"
         "    <property name='ActiveSession' type='(so)' access='read'/>"
         "    <property name='Id' type='s' access='read'/>"
         "  </interface>"
