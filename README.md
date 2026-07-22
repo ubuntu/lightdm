@@ -1,5 +1,5 @@
 # LightDM Display Manager
-[![Test status](https://github.com/canonical/lightdm/actions/workflows/test.yaml/badge.svg)](https://github.com/canonical/lightdm/actions/workflows/test.yaml)
+[![Test status](https://github.com/ubuntu/lightdm/actions/workflows/test.yaml/badge.svg)](https://github.com/ubuntu/lightdm/actions/workflows/test.yaml)
 [![LightDM questions on AskUbuntu](https://img.shields.io/stackexchange/askubuntu/t/lightdm?color=brightgreen)](https://askubuntu.com/questions/tagged/lightdm)
 
 LightDM is a lightweight, cross-desktop display manager. A display manager is a daemon that:
@@ -46,7 +46,7 @@ For example, if a sysadmin wanted to override the system configured default sess
 user-session=mysession
 ```
 
-Configuration is in keyfile format. For most installations you will want to change the keys in the `[Seat:*]` section as this applies to all seats on the system (normally just one). A configuration file showing all the possible keys is provided in [`data/lightdm.conf`](https://github.com/canonical/lightdm/blob/main/data/lightdm.conf).
+Configuration is in keyfile format. For most installations you will want to change the keys in the `[Seat:*]` section as this applies to all seats on the system (normally just one). A configuration file showing all the possible keys is provided in [`data/lightdm.conf`](https://github.com/ubuntu/lightdm/blob/main/data/lightdm.conf).
 
 ### Display Setup Script
 
