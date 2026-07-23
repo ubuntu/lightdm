@@ -15,6 +15,8 @@ noinst_PROGRAMS = dbus-env \
                   vnc-client \
                   X \
                   Xvnc
+check_PROGRAMS = test-x-authority-write
+TESTS = $(check_PROGRAMS)
 dist_noinst_SCRIPTS = lightdm-session \
                       test-python-greeter
 noinst_LTLIBRARIES = libsystem.la
@@ -60,6 +62,19 @@ test_runner_LDADD = \
 	$(GLIB_LIBS) \
 	$(GIO_LIBS) \
 	$(GIO_UNIX_LIBS)
+
+test_x_authority_write_SOURCES = \
+	test-x-authority-write.c \
+	$(top_srcdir)/src/x-authority.c \
+	$(top_srcdir)/src/x-authority.h
+test_x_authority_write_CFLAGS = \
+	-I$(top_srcdir)/src \
+	$(WARN_CFLAGS) \
+	$(GOBJECT_CFLAGS) \
+	$(GLIB_CFLAGS)
+test_x_authority_write_LDADD = \
+	$(GOBJECT_LIBS) \
+	$(GLIB_LIBS)
 
 X_SOURCES = X.c x-authority.c x-authority.h x-common.c x-common.h x-server.c x-server.h xdmcp-client.c xdmcp-client.h status.c status.h
 X_CFLAGS = \
