@@ -1,3 +1,24 @@
+Overview of changes in lightdm 1.32.0
+
+   * Overwrite existing X authority files to avoid corruption
+   * Change logind-check-graphical default config value to true
+   * Block autologin if shell in nologin or false
+   * Fix failure if with greeters sending two login requests quickly.
+   * Drop Qt 4 support, it's been unsupported since 2015
+   * Fix lightdm_set_layout
+   * Improve method of determining a session is Wayland
+   * Don't call setenv with a NULL value - the behaviour is undefined
+   * Replace deprecated QAbstractItemModel::setRoleNames
+   * Move D-Bus conf file to $(datadir)/dbus-1/system.d
+   * Fix tests failing when compiled with --with-greeter-user
+   * Use Python 3 in tests
+   * Disable compiler optimizations for test programs
+   * Compilation fix for glibc 2.33
+   * Remove deprecated use of G_TYPE_INSTANCE_GET_PRIVATE, G_PARAM_PRIVATE
+   * Fix compile failure due to use of clearenv on FreeBSD
+   * Use a size_t to resolve a compile warning
+   * Fix DesktopManager typo in man page
+
 Overview of changes in lightdm 1.30.0
 
     * Add lightdm_user_get_is_locked ()
@@ -86,7 +107,7 @@ Overview of changes in lightdm 1.21.1
 
     * Fix greeters crashing with unknown configuration keys (regression from
       1.21.0)
-    * Add an API verison to the greeter-daemon protocol for future enhancements
+    * Add an API version to the greeter-daemon protocol for future enhancements
     * More regression tests
 
 Overview of changes in lightdm 1.21.0
@@ -356,7 +377,7 @@ Overview of changes in lightdm 1.11.2
 
 Overview of changes in lightdm 1.11.1
 
-    * Allow greeters to remain runing to reduce startup time when switching to a
+    * Allow greeters to remain running to reduce startup time when switching to a
       greeter
     * Add asynchronous methods to liblightdm
 
@@ -828,7 +849,7 @@ Overview of changes in lightdm 1.1.0
     * Use 'default' as the default greeter (make a symlink)
     * GTK greeter now initializes i18n
     * GTK greeter now remembers last user
-    * Start authentication for automtically selected user in GTK greeter
+    * Start authentication for automatically selected user in GTK greeter
     * Don't resize GTK greeter on each click
     * Start authentication when scrolling through GTK greeter entries
     * Link liblightdm-qt against QtGui
@@ -1010,7 +1031,7 @@ Overview of changes in lightdm 0.4.4
       user-authority-in-system-dir=true in lightdm.conf.
     * When using system authority the authority can be updated by the user.
     * Written X authority files now checks hostname and display number.
-    * Enironment is no longer passed through to X servers and sessions, this is
+    * Environment is no longer passed through to X servers and sessions, this is
       no longer required now PAM works correctly.
     * liblightdm API changes:
       - Drop ldm_greeter_get_is_first() - it was added for testing and doesn't
@@ -1199,7 +1220,7 @@ Overview of changes in lightdm 0.2.0
     * Support using no greeter user in lightdm.conf
     * Flush writes to main log file
     * Allow non-privilidged user to write greeter log file in /var
-    * Fix bugs stopping running greeter as priviledged user (i.e. root)
+    * Fix bugs stopping running greeter as privileged user (i.e. root)
     * Don't default to running greeters with the GDM user - it may not exist!
 
 Overview of changes in lightdm 0.1.2

@@ -11,12 +11,15 @@
 #include <unistd.h>
 #include <pwd.h>
 
+#include "../../config.h"
+
 /* Timeout in ms waiting for the status we expect */
 static int status_timeout_ms = 4000;
 
 /* Timeout in ms to wait for SIGTERM to be handled by a child process */
 #define KILL_TIMEOUT 2000
 
+static GDBusConnection *dbus_conn = NULL;
 static gchar *test_runner_command;
 static gchar *config_path;
 static GKeyFile *config;
@@ -25,9 +28,58 @@ static gchar *status_socket_name = NULL;
 static GList *statuses = NULL;
 typedef struct
 {
+    /*
+     * text is the script line with its "#?" prefix removed.  (Lines without
+     * that prefix are ignored.)  There are two types of lines:
+     *
+     *   - If text starts with '*', then text is a command that will trigger
+     *     some action when executed (see handle_command).
+     *
+     *   - Otherwise, text is a status matcher: a regular expression that is
+     *     expected to match a status line emitted by the test code when an
+     *     event of interest occurs.
+     */
     gchar *text;
+    /*
+     * done is set to true when:
+     *   - command line: the command is executed
+     *   - status matcher line: it is matched with an emitted status line
+     */
     gboolean done;
 } ScriptLine;
+/*
+ * script is a list of ScriptLines.  To avoid test flakiness caused by event
+ * concurrency, status messages emitted during testing do not have to appear in
+ * the same order as their corresponding status matcher lines in the script.  In
+ * effect, the test runner moves event matcher lines up or down to accommodate
+ * the actual observed events.  It will not move a matcher line above a previous
+ * FENCE command (if one exists), nor will it move it below the next command
+ * (FENCE or otherwise).  Details:
+ *
+ *   - When the test code emits a status message, the test runner only considers
+ *     the first status matcher line that meets ALL of the following
+ *     requirements:
+ *
+ *       * The status matcher line has not already been matched with a
+ *         previously emitted status message (its done flag is false).
+ *
+ *       * The status message and the status matcher line both have the same
+ *         prefix.  (Prefix is defined as the characters before the first space,
+ *         if any.)
+ *
+ *       * The status matcher line is before the next FENCE command, if one
+ *         exists.
+ *
+ *     If no such line exists, or its regular expression does not match, the
+ *     test fails.
+ *
+ *     Other than the above constraints, the test runner does not care where the
+ *     matching status matcher line is in the script.  The line could even be
+ *     after a command line that has not yet executed (except for FENCE).
+ *
+ *   - A command line will not be executed until every line above it is resolved
+ *     (observed or executed, depending on the line type).
+ */
 static GList *script = NULL;
 static guint status_timeout = 0;
 static gchar *temp_dir = NULL;
@@ -192,6 +244,7 @@ watch_process (pid_t pid)
     return process;
 }
 
+/* WARNING: This function might return. */
 static void
 quit (int status)
 {
@@ -235,6 +288,7 @@ quit (int status)
     exit (status);
 }
 
+/* WARNING: This function might return. */
 static void
 fail (const gchar *event, const gchar *expected)
 {
@@ -269,9 +323,16 @@ get_prefix (const gchar *text)
 static ScriptLine *
 get_script_line (const gchar *prefix)
 {
+    gboolean stop_at_fence = prefix != NULL;
     for (GList *link = script; link; link = link->next)
     {
         ScriptLine *line = link->data;
+
+        if (line->done)
+            continue;
+
+        if (stop_at_fence && strcmp (line->text, "*FENCE") == 0)
+            break;
 
         /* Ignore lines with other prefixes */
         if (prefix)
@@ -281,8 +342,7 @@ get_script_line (const gchar *prefix)
                 continue;
         }
 
-        if (!line->done)
-            return line;
+        return line;
     }
 
     return NULL;
@@ -417,9 +477,11 @@ handle_command (const gchar *command)
             g_string_append (command_line, " --debug");
         g_string_append_printf (command_line, " --cache-dir %s/cache", temp_dir);
 
-        test_runner_command = g_strdup_printf ("PATH=%s LD_PRELOAD=%s LD_LIBRARY_PATH=%s LIGHTDM_TEST_ROOT=%s DBUS_SESSION_BUS_ADDRESS=%s %s\n",
-                                               g_getenv ("PATH"), g_getenv ("LD_PRELOAD"), g_getenv ("LD_LIBRARY_PATH"), g_getenv ("LIGHTDM_TEST_ROOT"), g_getenv ("DBUS_SESSION_BUS_ADDRESS"),
+        test_runner_command = g_strdup_printf ("PATH=%s LD_PRELOAD=%s LD_LIBRARY_PATH=%s LIGHTDM_TEST_ROOT=%s DBUS_SESSION_BUS_ADDRESS=%s DBUS_SYSTEM_BUS_ADDRESS=%s %s\n",
+                                               g_getenv ("PATH"), g_getenv ("LD_PRELOAD"), g_getenv ("LD_LIBRARY_PATH"), g_getenv ("LIGHTDM_TEST_ROOT"), g_getenv ("DBUS_SESSION_BUS_ADDRESS"), g_getenv ("DBUS_SYSTEM_BUS_ADDRESS"),
                                                command_line->str);
+        if (getenv ("DEBUG"))
+            g_print ("Command line: %s\n", test_runner_command);
 
         gchar **lightdm_argv;
         g_autoptr(GError) error = NULL;
@@ -458,10 +520,22 @@ handle_command (const gchar *command)
         /* Restart status timeout */
         status_timeout = g_timeout_add (status_timeout_ms, status_timeout_cb, NULL);
     }
+    else if (strcmp (name, "FENCE") == 0)
+    {
+        /*
+         * Nothing special needs to be done here because FENCE's behavior is
+         * implemented elsewhere:
+         *   - run_commands ensures that every status matcher line above a
+         *     command (any command, not just FENCE) has been matched before
+         *     executing the command.
+         *   - When called from check_status, get_script_line stops at the next
+         *     FENCE.
+         */
+    }
     else if (strcmp (name, "ADD-SEAT") == 0)
     {
         const gchar *id = g_hash_table_lookup (params, "ID");
-        Login1Seat *seat = add_login1_seat (g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, NULL), id, TRUE);
+        Login1Seat *seat = add_login1_seat (dbus_conn, id, TRUE);
         const gchar *v = g_hash_table_lookup (params, "CAN-GRAPHICAL");
         if (v)
             seat->can_graphical = strcmp (v, "TRUE") == 0;
@@ -472,7 +546,7 @@ handle_command (const gchar *command)
     else if (strcmp (name, "ADD-LOCAL-X-SEAT") == 0)
     {
         const gchar *v = g_hash_table_lookup (params, "DISPLAY");
-        g_autoptr(GVariant) result = g_dbus_connection_call_sync (g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, NULL),
+        g_autoptr(GVariant) result = g_dbus_connection_call_sync (dbus_conn,
                                                                   "org.freedesktop.DisplayManager",
                                                                   "/org/freedesktop/DisplayManager",
                                                                   "org.freedesktop.DisplayManager",
@@ -514,7 +588,7 @@ handle_command (const gchar *command)
             }
 
             g_autoptr(GError) error = NULL;
-            if (!g_dbus_connection_emit_signal (g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, NULL),
+            if (!g_dbus_connection_emit_signal (dbus_conn,
                                                 NULL,
                                                 seat->path,
                                                 "org.freedesktop.DBus.Properties",
@@ -527,12 +601,12 @@ handle_command (const gchar *command)
     else if (strcmp (name, "REMOVE-SEAT") == 0)
     {
         const gchar *id = g_hash_table_lookup (params, "ID");
-        remove_login1_seat (g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, NULL), id);
+        remove_login1_seat (dbus_conn, id);
     }
     else if (strcmp (name, "LIST-SEATS") == 0)
     {
         g_autoptr(GError) error = NULL;
-        g_autoptr(GVariant) result = g_dbus_connection_call_sync (g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, NULL),
+        g_autoptr(GVariant) result = g_dbus_connection_call_sync (dbus_conn,
                                                                   "org.freedesktop.DisplayManager",
                                                                   "/org/freedesktop/DisplayManager",
                                                                   "org.freedesktop.DBus.Properties",
@@ -578,7 +652,7 @@ handle_command (const gchar *command)
     else if (strcmp (name, "LIST-SESSIONS") == 0)
     {
         g_autoptr(GError) error = NULL;
-        g_autoptr(GVariant) result = g_dbus_connection_call_sync (g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, NULL),
+        g_autoptr(GVariant) result = g_dbus_connection_call_sync (dbus_conn,
                                                                   "org.freedesktop.DisplayManager",
                                                                   "/org/freedesktop/DisplayManager",
                                                                   "org.freedesktop.DBus.Properties",
@@ -623,10 +697,11 @@ handle_command (const gchar *command)
     }
     else if (strcmp (name, "SEAT-CAN-SWITCH") == 0)
     {
+        const gchar *path = g_hash_table_lookup (params, "PATH");
         g_autoptr(GError) error = NULL;
-        g_autoptr(GVariant) result = g_dbus_connection_call_sync (g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, NULL),
+        g_autoptr(GVariant) result = g_dbus_connection_call_sync (dbus_conn,
                                                                   "org.freedesktop.DisplayManager",
-                                                                  "/org/freedesktop/DisplayManager/Seat0",
+                                                                  path ? path : "/org/freedesktop/DisplayManager/Seat0",
                                                                   "org.freedesktop.DBus.Properties",
                                                                   "Get",
                                                                   g_variant_new ("(ss)", "org.freedesktop.DisplayManager.Seat", "CanSwitch"),
@@ -637,6 +712,8 @@ handle_command (const gchar *command)
                                                                   &error);
 
         g_autoptr(GString) status = g_string_new ("RUNNER SEAT-CAN-SWITCH");
+        if (path)
+            g_string_append_printf (status, " PATH=%s", path);
         if (result)
         {
             g_autoptr(GVariant) value = NULL;
@@ -656,7 +733,7 @@ handle_command (const gchar *command)
     else if (strcmp (name, "SEAT-HAS-GUEST-ACCOUNT") == 0)
     {
         g_autoptr(GError) error = NULL;
-        g_autoptr(GVariant) result = g_dbus_connection_call_sync (g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, NULL),
+        g_autoptr(GVariant) result = g_dbus_connection_call_sync (dbus_conn,
                                                                   "org.freedesktop.DisplayManager",
                                                                   "/org/freedesktop/DisplayManager/Seat0",
                                                                   "org.freedesktop.DBus.Properties",
@@ -687,7 +764,7 @@ handle_command (const gchar *command)
     }
     else if (strcmp (name, "SWITCH-TO-GREETER") == 0)
     {
-        g_dbus_connection_call (g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, NULL),
+        g_dbus_connection_call (dbus_conn,
                                 "org.freedesktop.DisplayManager",
                                 "/org/freedesktop/DisplayManager/Seat0",
                                 "org.freedesktop.DisplayManager.Seat",
@@ -703,7 +780,7 @@ handle_command (const gchar *command)
     else if (strcmp (name, "SWITCH-TO-USER") == 0)
     {
         const gchar *username = g_hash_table_lookup (params, "USERNAME");
-        g_dbus_connection_call (g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, NULL),
+        g_dbus_connection_call (dbus_conn,
                                 "org.freedesktop.DisplayManager",
                                 "/org/freedesktop/DisplayManager/Seat0",
                                 "org.freedesktop.DisplayManager.Seat",
@@ -718,7 +795,7 @@ handle_command (const gchar *command)
     }
     else if (strcmp (name, "SWITCH-TO-GUEST") == 0)
     {
-        g_dbus_connection_call (g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, NULL),
+        g_dbus_connection_call (dbus_conn,
                                 "org.freedesktop.DisplayManager",
                                 "/org/freedesktop/DisplayManager/Seat0",
                                 "org.freedesktop.DisplayManager.Seat",
@@ -919,23 +996,34 @@ handle_command (const gchar *command)
 static void
 run_commands (void)
 {
-    /* Stop daemon if requested */
     while (TRUE)
     {
-        /* Commands start with an asterisk */
         ScriptLine *line = get_script_line (NULL);
-        if (!line || line->text[0] != '*')
-            break;
+        if (!line)
+        {
+            quit (EXIT_SUCCESS);
+            return;
+        }
+
+        /* Commands start with an asterisk */
+        if (line->text[0] != '*')
+            /*
+             * line is not a command line, and it is not marked as done.  To
+             * avoid races, don't execute a command until all lines in the
+             * script above the command's line are marked as done.  (This
+             * function will be called again after the next status arrives.)
+             * The FENCE command in particular relies on this behavior.
+             */
+            return;
 
         statuses = g_list_append (statuses, g_strdup (line->text));
         line->done = TRUE;
 
+        if (getenv ("DEBUG"))
+            g_print ("%s\n", line->text);
+
         handle_command (line->text + 1);
     }
-
-    /* Stop at the end of the script */
-    if (get_script_line (NULL) == NULL)
-        quit (EXIT_SUCCESS);
 }
 
 static gboolean
@@ -1147,14 +1235,13 @@ static void
 start_upower_daemon (void)
 {
     service_count++;
-    g_bus_own_name (G_BUS_TYPE_SYSTEM,
-                    "org.freedesktop.UPower",
-                    G_BUS_NAME_OWNER_FLAGS_NONE,
-                    upower_name_acquired_cb,
-                    NULL,
-                    NULL,
-                    NULL,
-                    NULL);
+    g_bus_own_name_on_connection (dbus_conn,
+                                  "org.freedesktop.UPower",
+                                  G_BUS_NAME_OWNER_FLAGS_NONE,
+                                  upower_name_acquired_cb,
+                                  NULL,
+                                  NULL,
+                                  NULL);
 }
 
 static void
@@ -1431,14 +1518,13 @@ static void
 start_console_kit_daemon (void)
 {
     service_count++;
-    g_bus_own_name (G_BUS_TYPE_SYSTEM,
-                    "org.freedesktop.ConsoleKit",
-                    G_BUS_NAME_OWNER_FLAGS_NONE,
-                    NULL,
-                    ck_name_acquired_cb,
-                    NULL,
-                    NULL,
-                    NULL);
+    g_bus_own_name_on_connection (dbus_conn,
+                                  "org.freedesktop.ConsoleKit",
+                                  G_BUS_NAME_OWNER_FLAGS_NONE,
+                                  ck_name_acquired_cb,
+                                  NULL,
+                                  NULL,
+                                  NULL);
 }
 
 static void
@@ -1893,14 +1979,13 @@ static void
 start_login1_daemon (void)
 {
     service_count++;
-    g_bus_own_name (G_BUS_TYPE_SYSTEM,
-                    "org.freedesktop.login1",
-                    G_BUS_NAME_OWNER_FLAGS_NONE,
-                    NULL,
-                    login1_name_acquired_cb,
-                    NULL,
-                    NULL,
-                    NULL);
+    g_bus_own_name_on_connection (dbus_conn,
+                                  "org.freedesktop.login1",
+                                  G_BUS_NAME_OWNER_FLAGS_NONE,
+                                  login1_name_acquired_cb,
+                                  NULL,
+                                  NULL,
+                                  NULL);
 }
 
 static AccountsUser *
@@ -2297,14 +2382,13 @@ static void
 start_accounts_service_daemon (void)
 {
     service_count++;
-    g_bus_own_name (G_BUS_TYPE_SYSTEM,
-                    "org.freedesktop.Accounts",
-                    G_BUS_NAME_OWNER_FLAGS_NONE,
-                    accounts_name_acquired_cb,
-                    NULL,
-                    NULL,
-                    NULL,
-                    NULL);
+    g_bus_own_name_on_connection (dbus_conn,
+                                  "org.freedesktop.Accounts",
+                                  G_BUS_NAME_OWNER_FLAGS_NONE,
+                                  accounts_name_acquired_cb,
+                                  NULL,
+                                  NULL,
+                                  NULL);
 }
 
 static void
@@ -2383,6 +2467,52 @@ dbus_signal_cb (GDBusConnection *connection,
     g_string_append_printf (status, " NAME=%s", signal_name);
 
     check_status (status->str);
+}
+
+/*
+ * Copies src to dst.  Takes ownership of src and dst.  If src is a symlink, the
+ * target is copied, not the symlink.  If the final component of src is "*", the
+ * contents of the parent of src (which must not have any subdirectories) is
+ * copied, and dst must name a directory.  Otherwise, src must name a file.  dst
+ * may be a filename or directory name.  Terminates the process if copying
+ * fails.
+ */
+static void
+cp (GFile *src, GFile *dst)
+{
+    g_autoptr(GFile) s = g_steal_pointer(&src);
+    g_autoptr(GFile) d = g_steal_pointer(&dst);
+    g_autofree char *base = g_file_get_basename(s);
+    if (strcmp (base, "*") == 0)
+    {
+        if (g_file_query_file_type (d, G_FILE_QUERY_INFO_NONE, NULL) != G_FILE_TYPE_DIRECTORY)
+            g_error ("Cannot copy %s to %s: destination is not a directory", g_file_peek_path (s), g_file_peek_path (d));
+        g_autoptr(GFile) sdir = g_file_get_parent (s);
+        g_autoptr(GError) error = NULL;
+        g_autoptr(GFileEnumerator) direnum = g_file_enumerate_children (sdir, G_FILE_ATTRIBUTE_STANDARD_NAME, G_FILE_QUERY_INFO_NONE, NULL, &error);
+        if (!direnum)
+            g_error ("Failed to enumerate directory %s: %s", g_file_peek_path (sdir), error->message);
+        while (TRUE) {
+            GFileInfo *info = NULL;
+            if (!g_file_enumerator_iterate (direnum, &info, NULL, NULL, &error))
+                g_error ("Failed to enumerate directory %s: %s:", g_file_peek_path (sdir), error->message);
+            if (!info)
+                break;
+            g_object_ref (G_OBJECT (d));
+            cp (g_file_enumerator_get_child (direnum, info), d);
+        }
+        if (!g_file_enumerator_close (direnum, NULL, &error))
+            g_error ("Failed to close enumerator for directory %s: %s", g_file_peek_path (sdir), error->message);
+        return;
+    }
+    if (g_file_query_file_type (d, G_FILE_QUERY_INFO_NONE, NULL) == G_FILE_TYPE_DIRECTORY)
+    {
+        cp (g_steal_pointer(&s), g_file_new_build_filename (g_file_peek_path (d), base, NULL));
+        return;
+    }
+    g_autoptr(GError) error = NULL;
+    if (!g_file_copy (s, d, G_FILE_COPY_NONE, NULL, NULL, NULL, &error))
+        g_error ("Failed to copy %s to %s: %s", g_file_peek_path (s), g_file_peek_path (d), error->message);
 }
 
 int
@@ -2495,10 +2625,10 @@ main (int argc, char **argv)
     /* Copy over the configuration */
     g_mkdir_with_parents (g_strdup_printf ("%s/etc/lightdm", temp_dir), 0755);
     if (!g_key_file_has_key (config, "test-runner-config", "have-config", NULL) || g_key_file_get_boolean (config, "test-runner-config", "have-config", NULL))
-        if (system (g_strdup_printf ("cp %s %s/etc/lightdm/lightdm.conf", config_path, temp_dir)))
-            perror ("Failed to copy configuration");
-    if (system (g_strdup_printf ("cp %s/tests/data/keys.conf %s/etc/lightdm/", SRCDIR, temp_dir)))
-        perror ("Failed to copy key configuration");
+        cp (g_file_new_for_path (config_path),
+            g_file_new_build_filename (temp_dir, "etc/lightdm/lightdm.conf", NULL));
+    cp (g_file_new_build_filename (SRCDIR, "tests/data/keys.conf", NULL),
+        g_file_new_build_filename (temp_dir, "etc/lightdm", NULL));
 
     g_autofree gchar *additional_system_config = g_key_file_get_string (config, "test-runner-config", "additional-system-config", NULL);
     if (additional_system_config)
@@ -2507,8 +2637,8 @@ main (int argc, char **argv)
 
         g_auto(GStrv) files = g_strsplit (additional_system_config, " ", -1);
         for (int i = 0; files[i]; i++)
-            if (system (g_strdup_printf ("cp %s/tests/scripts/%s %s/usr/share/lightdm/lightdm.conf.d", SRCDIR, files[i], temp_dir)))
-                perror ("Failed to copy configuration");
+            cp (g_file_new_build_filename (SRCDIR, "tests/scripts", files[i], NULL),
+                g_file_new_build_filename (temp_dir, "usr/share/lightdm/lightdm.conf.d", NULL));
     }
 
     g_autofree gchar *additional_config = g_key_file_get_string (config, "test-runner-config", "additional-config", NULL);
@@ -2518,8 +2648,8 @@ main (int argc, char **argv)
 
         g_auto(GStrv) files = g_strsplit (additional_config, " ", -1);
         for (int i = 0; files[i]; i++)
-            if (system (g_strdup_printf ("cp %s/tests/scripts/%s %s/etc/xdg/lightdm/lightdm.conf.d", SRCDIR, files[i], temp_dir)))
-                perror ("Failed to copy configuration");
+            cp (g_file_new_build_filename (SRCDIR, "tests/scripts", files[i], NULL),
+                g_file_new_build_filename (temp_dir, "etc/xdg/lightdm/lightdm.conf.d", NULL));
     }
 
     if (g_key_file_has_key (config, "test-runner-config", "shared-data-dirs", NULL))
@@ -2545,19 +2675,20 @@ main (int argc, char **argv)
     }
 
     /* Always copy the script */
-    if (system (g_strdup_printf ("cp %s %s/script", config_path, temp_dir)))
-        perror ("Failed to copy configuration");
+    cp (g_file_new_for_path (config_path),
+        g_file_new_build_filename (temp_dir, "script", NULL));
 
     /* Copy over the greeter files */
-    if (system (g_strdup_printf ("cp %s/sessions/* %s/usr/share/lightdm/sessions", DATADIR, temp_dir)))
-        perror ("Failed to copy sessions");
-    if (system (g_strdup_printf ("cp %s/remote-sessions/* %s/usr/share/lightdm/remote-sessions", DATADIR, temp_dir)))
-        perror ("Failed to copy remote sessions");
-    if (system (g_strdup_printf ("cp %s/greeters/* %s/usr/share/lightdm/greeters", DATADIR, temp_dir)))
-        perror ("Failed to copy greeters");
+    cp (g_file_new_build_filename (DATADIR, "sessions/*", NULL),
+        g_file_new_build_filename (temp_dir, "usr/share/lightdm/sessions", NULL));
+    cp (g_file_new_build_filename (DATADIR, "remote-sessions/*", NULL),
+        g_file_new_build_filename (temp_dir, "usr/share/lightdm/remote-sessions", NULL));
+    cp (g_file_new_build_filename (DATADIR, "greeters/*", NULL),
+        g_file_new_build_filename (temp_dir, "usr/share/lightdm/greeters", NULL));
 
     /* Set up the default greeter */
-    g_autofree gchar *greeter_path = g_build_filename (temp_dir, "usr", "share", "lightdm", "greeters", "default.desktop", NULL);
+    g_autofree gchar *greeter_session = g_strdup_printf ("%s.desktop", DEFAULT_GREETER_SESSION);
+    g_autofree gchar *greeter_path = g_build_filename (temp_dir, "usr", "share", "lightdm", "greeters", greeter_session, NULL);
     g_autofree gchar *greeter = g_strdup_printf ("%s.desktop", argv[2]);
     if (symlink (greeter, greeter_path) < 0)
     {
@@ -2579,7 +2710,7 @@ main (int argc, char **argv)
         /* Root account */
         {"root",             "",          "root",                  0},
         /* Unprivileged account for greeters */
-        {"lightdm",          "",          "",                    100},
+        {GREETER_USER,          "",          "",                 100},
         /* These accounts have a password */
         {"have-password1",   "password",  "Password User 1",    1000},
         {"have-password2",   "password",  "Password User 2",    1001},
@@ -2641,13 +2772,15 @@ main (int argc, char **argv)
         {"corrupt-xauth",    "password",  "Corrupt Xauthority", 1032},
         /* User to test properties */
         {"prop-user",        "",          "TEST",               1033},
+        /* This account has the home directory changed by PAM during authentication */
+        {"change-home-dir",    "",       "Change Home Dir User", 1034},
         {NULL,               NULL,        NULL,                    0}
     };
     g_autoptr(GString) passwd_data = g_string_new ("");
     g_autoptr(GString) group_data = g_string_new ("");
     for (int i = 0; users[i].user_name; i++)
     {
-        if (strcmp (users[i].user_name, "mount-home-dir") != 0 && strcmp (users[i].user_name, "make-home-dir") != 0)
+        if (strcmp (users[i].user_name, "mount-home-dir") != 0 && strcmp (users[i].user_name, "make-home-dir") != 0 && strcmp (users[i].user_name, "change-home-dir") != 0)
         {
             g_autofree gchar *path = g_build_filename (home_dir, users[i].user_name, NULL);
             g_mkdir_with_parents (path, 0755);
@@ -2713,6 +2846,10 @@ main (int argc, char **argv)
     if (g_key_file_has_key (config, "test-runner-config", "timeout", NULL))
         status_timeout_ms = g_key_file_get_integer (config, "test-runner-config", "timeout", NULL) * 1000;
 
+    dbus_conn = g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, &error);
+    if (!dbus_conn)
+        g_error("Failed to connect to system D-Bus: %s", error->message);
+
     /* Start D-Bus services */
     if (!g_key_file_get_boolean (config, "test-runner-config", "disable-upower", NULL))
         start_upower_daemon ();
@@ -2726,7 +2863,7 @@ main (int argc, char **argv)
     /* Listen for daemon bus events */
     if (g_key_file_get_boolean (config, "test-runner-config", "log-dbus", NULL))
     {
-        g_dbus_connection_signal_subscribe (g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, NULL),
+        g_dbus_connection_signal_subscribe (dbus_conn,
                                             "org.freedesktop.DisplayManager",
                                             "org.freedesktop.DBus.Properties",
                                             "PropertiesChanged",
@@ -2736,7 +2873,7 @@ main (int argc, char **argv)
                                             properties_changed_cb,
                                             NULL,
                                             NULL);
-        g_dbus_connection_signal_subscribe (g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, NULL),
+        g_dbus_connection_signal_subscribe (dbus_conn,
                                             "org.freedesktop.DisplayManager",
                                             "org.freedesktop.DisplayManager",
                                             NULL,

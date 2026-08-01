@@ -27,8 +27,8 @@ Build-Depends: autoconf,
                quilt,
                valac,
                yelp-tools
-Homepage: https://github.com/canonical/lightdm
-Vcs-Git: https://github.com/canonical/lightdm
+Homepage: https://github.com/ubuntu/lightdm
+Vcs-Git: https://github.com/ubuntu/lightdm
 
 Package: lightdm
 Architecture: any

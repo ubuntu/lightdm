@@ -27,6 +27,9 @@ typedef struct
     /* Authority */
     XAuthority *authority;
 
+    /* Cached hostname for the authority */
+    gchar local_hostname[1024];
+
     /* Connection to this X server */
     xcb_connection_t *connection;
 } XServerPrivate;
@@ -91,6 +94,21 @@ x_server_set_authority (XServer *server, XAuthority *authority)
         priv->authority = g_object_ref (authority);
 }
 
+void
+x_server_set_local_authority (XServer *server)
+{
+    XServerPrivate *priv = x_server_get_instance_private (server);
+
+    g_return_if_fail (server != NULL);
+
+    g_clear_object (&priv->authority);
+    char display_number[12];
+    g_snprintf(display_number, sizeof(display_number), "%d", x_server_get_display_number (server));
+
+    gethostname (priv->local_hostname, 1024);
+    priv->authority = x_authority_new_cookie (XAUTH_FAMILY_LOCAL, (guint8 *) priv->local_hostname, strlen (priv->local_hostname), display_number);
+}
+
 XAuthority *
 x_server_get_authority (XServer *server)
 {
@@ -108,7 +126,18 @@ x_server_get_session_type (DisplayServer *server)
 static gboolean
 x_server_get_can_share (DisplayServer *server)
 {
-    return TRUE;
+    XServerPrivate *priv = x_server_get_instance_private ((XServer*) server);
+    gchar actual_local_hostname[1024];
+
+    g_return_val_if_fail (server != NULL, FALSE);
+
+    if (priv->local_hostname[0] == '\0')
+        return TRUE;
+
+    /* The XAuthority depends on the hostname so we can't share the display
+     * server if the hostname has been changed */
+    gethostname (actual_local_hostname, 1024);
+    return g_strcmp0 (actual_local_hostname, priv->local_hostname) == 0;
 }
 
 static gboolean
@@ -152,13 +181,60 @@ x_server_connect_session (DisplayServer *display_server, Session *session)
         g_autofree gchar *tty_text = NULL;
         g_autofree gchar *vt_text = NULL;
 
+#ifdef __FreeBSD__
+        char vty_num32[6];
+        int num;
+        const int base = 32;
+        size_t offset = 0;
+
+        num = vt - 1;
+
+        if (num == 0) {
+            vty_num32[offset++] = '0';
+            vty_num32[offset] = '\0';
+        } else {
+            for (int remaning = num; remaning > 0; remaning /= base, offset++) {
+                if (offset + 1 >= 6) {
+                    g_error ("tty number buffer too small");
+                    goto error;
+                }
+
+                const int value = remaning % base;
+                if (value >= 10) {
+                    vty_num32[offset] = 'a' + value - 10;
+                } else {
+                    vty_num32[offset] = '0' + value;
+                }
+            }
+
+            for (size_t i = 0; i < offset / 2; i++) {
+                const size_t p1 = i;
+                const size_t p2 = offset - 1 - i;
+                const char tmp = vty_num32[p1];
+                vty_num32[p1] = vty_num32[p2];
+                vty_num32[p2] = tmp;
+            }
+
+            vty_num32[offset] = '\0';
+        }
+
+        tty_text = g_strdup_printf ("/dev/ttyv%s", vty_num32);
+#else
         tty_text = g_strdup_printf ("/dev/tty%d", vt);
+#endif
         session_set_tty (session, tty_text);
 
+#ifdef __FreeBSD__
+        vt_text = g_strdup_printf ("%d", num);
+#else
         vt_text = g_strdup_printf ("%d", vt);
+#endif
         session_set_env (session, "XDG_VTNR", vt_text);
     }
     else
+#ifdef __FreeBSD__
+error:
+#endif
         l_debug (session, "Not setting XDG_VTNR");
 
     session_set_env (session, "DISPLAY", x_server_get_address (X_SERVER (display_server)));

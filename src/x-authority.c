@@ -65,14 +65,6 @@ x_authority_new_cookie (guint16 family, const guint8 *address, gsize address_len
     return x_authority_new (family, address, address_length, number, "MIT-MAGIC-COOKIE-1", cookie, 16);
 }
 
-XAuthority *
-x_authority_new_local_cookie (const gchar *number)
-{
-    gchar hostname[1024];
-    gethostname (hostname, 1024);
-    return x_authority_new_cookie (XAUTH_FAMILY_LOCAL, (guint8 *) hostname, strlen (hostname), number);
-}
-
 void
 x_authority_set_family (XAuthority *auth, guint16 family)
 {
@@ -320,7 +312,7 @@ x_authority_write (XAuthority *auth, XAuthWriteMode mode, const gchar *filename,
 
     /* Write records back */
     errno = 0;
-    int output_fd = g_open (filename, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
+    int output_fd = g_open (filename, O_WRONLY | O_CREAT | O_TRUNC , S_IRUSR | S_IWUSR);
     if (output_fd < 0)
     {
         g_set_error (error,

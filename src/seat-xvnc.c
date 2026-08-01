@@ -36,13 +36,6 @@ SeatXVNC *seat_xvnc_new (GSocket *connection)
     return seat;
 }
 
-static void
-seat_xvnc_setup (Seat *seat)
-{
-    seat_set_supports_multi_session (seat, FALSE);
-    SEAT_CLASS (seat_xvnc_parent_class)->setup (seat);
-}
-
 static DisplayServer *
 seat_xvnc_create_display_server (Seat *seat, Session *session)
 {
@@ -57,9 +50,7 @@ seat_xvnc_create_display_server (Seat *seat, Session *session)
 
     g_autoptr(XServerXVNC) x_server = x_server_xvnc_new ();
     priv->x_server = g_object_ref (x_server);
-    g_autofree gchar *number = g_strdup_printf ("%d", x_server_get_display_number (X_SERVER (x_server)));
-    g_autoptr(XAuthority) cookie = x_authority_new_local_cookie (number);
-    x_server_set_authority (X_SERVER (x_server), cookie);
+    x_server_set_local_authority (X_SERVER (x_server));
     x_server_xvnc_set_socket (x_server, g_socket_get_fd (priv->connection));
 
     const gchar *command = config_get_string (config_get_instance (), "VNCServer", "command");
@@ -106,6 +97,7 @@ seat_xvnc_run_script (Seat *seat, DisplayServer *display_server, Process *script
 static void
 seat_xvnc_init (SeatXVNC *seat)
 {
+    seat_set_supports_multi_session (SEAT (seat), FALSE);
 }
 
 static void
@@ -126,7 +118,6 @@ seat_xvnc_class_init (SeatXVNCClass *klass)
     SeatClass *seat_class = SEAT_CLASS (klass);
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-    seat_class->setup = seat_xvnc_setup;
     seat_class->create_display_server = seat_xvnc_create_display_server;
     seat_class->run_script = seat_xvnc_run_script;
     object_class->finalize = seat_xvnc_session_finalize;

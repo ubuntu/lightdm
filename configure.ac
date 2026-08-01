@@ -1,6 +1,6 @@
 dnl Process this file with autoconf to produce a configure script.
 
-AC_INIT(lightdm, 1.30.0)
+AC_INIT(lightdm, 1.32.0)
 AC_CONFIG_MACRO_DIR(m4)
 AC_CONFIG_HEADER(config.h)
 AM_INIT_AUTOMAKE([1.11 no-dist-gzip dist-xz foreign])
@@ -48,7 +48,7 @@ AC_CHECK_HEADERS(security/pam_appl.h, [], AC_MSG_ERROR(PAM not found))
 
 AC_CHECK_HEADERS(gcrypt.h, [], AC_MSG_ERROR(libgcrypt not found))
 
-AC_CHECK_FUNCS(setresgid setresuid clearenv)
+AC_CHECK_FUNCS(setresgid setresuid setusercontext clearenv __getgroups_chk)
 
 PKG_CHECK_MODULES(LIGHTDM, [
     glib-2.0 >= 2.44
@@ -216,6 +216,9 @@ po/Makefile.in
 src/Makefile
 tests/Makefile
 tests/src/Makefile
+tests/scripts/login-pam-config.conf
+tests/scripts/login-pam.conf
+tests/scripts/switch-to-greeter-return-session-pam.conf
 ])
 AC_OUTPUT
 

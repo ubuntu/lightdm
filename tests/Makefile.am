@@ -241,11 +241,13 @@ TESTS = \
 	test-multi-seat-autologin-seat1 \
 	test-multi-seat-seat0-non-graphical \
 	test-multi-seat-seat0-non-graphical-disabled \
+	test-multi-seat-no-multi-session \
 	test-multi-seat-non-graphical \
 	test-multi-seat-non-graphical-disabled \
 	test-multi-seat-change-graphical \
 	test-multi-seat-change-graphical-disabled \
 	test-multi-seat-globbing-config-sections \
+	test-multi-seat-wayland \
 	test-mir-autologin \
 	test-mir-greeter \
 	test-mir-session \
@@ -254,7 +256,8 @@ TESTS = \
 	test-wayland-greeter \
 	test-wayland-session \
 	test-invalid-seat \
-	test-seatdefaults-still-supported
+	test-seatdefaults-still-supported \
+	test-change-home-dir-on-session
 
 #	test-switch-to-greeter-return-session-repeat
 #	test-session-exit-error
@@ -387,6 +390,7 @@ EXTRA_DIST = \
 	scripts/autologin-timeout-logout.conf \
 	scripts/autologin-xserver-crash.conf \
 	scripts/change-authentication.conf \
+	scripts/change-home-dir-on-session.conf \
 	scripts/cancel-authentication.conf \
 	scripts/console-kit.conf \
 	scripts/console-kit-no-xdg-runtime.conf \
@@ -475,11 +479,13 @@ EXTRA_DIST = \
 	scripts/multi-seat-change-graphical.conf \
 	scripts/multi-seat-change-graphical-disabled.conf \
 	scripts/multi-seat-login.conf \
+	scripts/multi-seat-no-multi-session \
 	scripts/multi-seat-non-graphical.conf \
 	scripts/multi-seat-non-graphical-disabled.conf \
 	scripts/multi-seat-seat0-non-graphical.conf \
 	scripts/multi-seat-seat0-non-graphical-disabled.conf \
 	scripts/multi-seat-globbing-config-sections.conf \
+	scripts/multi-seat-wayland.conf \
 	scripts/no-accounts-service.conf \
 	scripts/no-config.conf \
 	scripts/no-console-kit.conf \

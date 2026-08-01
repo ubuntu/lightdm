@@ -1,6 +1,8 @@
-[![Build Status](https://travis-ci.org/Canonical/lightdm.svg?branch=master)](https://travis-ci.org/Canonical/lightdm)
+# LightDM Display Manager
+[![Test status](https://github.com/ubuntu/lightdm/actions/workflows/test.yaml/badge.svg)](https://github.com/ubuntu/lightdm/actions/workflows/test.yaml)
+[![LightDM questions on AskUbuntu](https://img.shields.io/stackexchange/askubuntu/t/lightdm?color=brightgreen)](https://askubuntu.com/questions/tagged/lightdm)
 
-LightDM is a cross-desktop display manager. A display manager is a daemon that:
+LightDM is a lightweight, cross-desktop display manager. A display manager is a daemon that:
 - Runs display servers (e.g. X) where necessary.
 - Runs greeters to allow users to pick which user account and session type to use.
 - Allows greeters to perform authentication using PAM.
@@ -8,27 +10,24 @@ LightDM is a cross-desktop display manager. A display manager is a daemon that:
 - Provides remote graphical login options.
 
 Key features of LightDM are:
-- Cross-desktop - supports different desktop technologies.
-- Supports different display technologies (X, Mir, Wayland ...).
-- Lightweight - low memory usage and fast performance.
-- Guest sessions.
-- Supports remote login (incoming - XDMCP, VNC, outgoing - XDMCP, pluggable).
-- Comprehensive test suite.
+- Cross-desktop - supports different desktop technologies (X, Wayland, Mir, etc)
+- Lightweight - low memory usage and fast performance
+- Supports remote login (incoming: XDMCP and VNC; outgoing: XDMCP and pluggable)
+- Supports guest sessions
+- Has a comprehensive test suite
 
-Releases are synchronised with the [Ubuntu release schedule](https://wiki.ubuntu.com/Releases) and supported for the duration of each Ubuntu release. Each release is announced on the [mailing list](http://lists.freedesktop.org/mailman/listinfo/lightdm).
-
-The core LightDM project does not provide any greeter with it and you should install a greeter appropriate to your system. Popular greeter projects are:
+The core LightDM project does not provide any greeter with it; you should install a greeter appropriate to your system. Popular greeter projects are:
 
  * [LightDM GTK+ Greeter](https://github.com/Xubuntu/lightdm-gtk-greeter) - a greeter that has moderate requirements (GTK+).
- * [LightDM KDE](http://projects.kde.org/lightdm) - greeter used in [KDE](http://kde.org) (Qt)
- * [LXqt Greeter](https://github.com/lxde/lxqt-lightdm-greeter) - greeter used in [LXqt](http://lxqt.org/) (Qt)
+ * [LightDM KDE Greeter](https://invent.kde.org/plasma/lightdm-kde-greeter) - greeter by [KDE](https://kde.org) (Qt)
+ * [LXQt Greeter](https://github.com/lxde/lxqt-lightdm-greeter) - greeter used in [LXQt](http://lxqt.org/) (Qt)
  * [Pantheon Greeter](https://github.com/elementary/greeter) - greeter used in [elementary OS](https://elementary.io/) (GTK+/Clutter).
  * [Unity Greeter](https://launchpad.net/unity-greeter) - greeter used in [Unity](https://launchpad.net/unity).
  * [WebKit2 Greeter](https://github.com/antergos/lightdm-webkit2-greeter) - greeter that can be themed using HTML/CSS/Javascript
  * Run with no greeter (automatic login only)
  * [Write your own...](https://www.freedesktop.org/wiki/Software/LightDM/Development/)
 
-# Configuration
+## Configuration
 
 LightDM configuration is provided by the following files:
 
@@ -47,10 +46,28 @@ For example, if a sysadmin wanted to override the system configured default sess
 user-session=mysession
 ```
 
-Configuration is in keyfile format. For most installations you will want to change the keys in the `[Seat:*]` section as this applies to all seats on the system (normally just one). A configuration file showing all the possible keys is provided in [`data/lightdm.conf`](https://github.com/Canonical/lightdm/blob/master/data/lightdm.conf).
+Configuration is in keyfile format. For most installations you will want to change the keys in the `[Seat:*]` section as this applies to all seats on the system (normally just one). A configuration file showing all the possible keys is provided in [`data/lightdm.conf`](https://github.com/ubuntu/lightdm/blob/main/data/lightdm.conf).
 
-# Questions
+### Display Setup Script
 
-Questions should be asked on the [mailing list](http://lists.freedesktop.org/mailman/listinfo/lightdm). All questions are welcome.
+LightDM can be configured to run an external shell script to setup displays.
+
+If an display setup script is used, it must be:
+ - Located under `/usr/share`
+ - Owned by the user `lightdm` and group `lightdm`
+ - It cannot print or log to any destination not accessible to LightDM
+
+To test a configuration:
+ - Install `xserver-xephyr`: `sudo apt install xserver-xephyr`
+ - Run the test as user lightdm: `sudo -u lightdm lightdm --test-mode --debug`
+
+Put the shell script reference in the LightDM configuration:
+
+```
+[Seat:*]
+display-setup-script=/usr/share/example_display_setup_script.sh 
+```
+
+## Questions
 
 [Stack Overflow](http://stackoverflow.com/search?q=lightdm) and [Ask Ubuntu](http://askubuntu.com/search?q=lightdm) are good sites for frequently asked questions.

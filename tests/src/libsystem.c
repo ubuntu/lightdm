@@ -127,6 +127,15 @@ getgroups (int size, gid_t list[])
     return groups_length;
 }
 
+#ifdef HAVE___GETGROUPS_CHK
+int __getgroups_chk (int size, gid_t list[], size_t listlen);
+int
+__getgroups_chk (int size, gid_t list[], size_t listlen)
+{
+   return getgroups (size, list);
+}
+#endif
+
 int
 setgroups (size_t size, const gid_t *list)
 {
@@ -198,6 +207,30 @@ redirect_path (const gchar *path)
     if (g_str_has_prefix (path, BUILDDIR))
         return g_strdup (path);
 
+    /*
+     * Don't redirect /tmp/dbus-* so that the test runner and its invoked
+     * LightDM can interact with the D-Bus daemon launched by dbus-env.c.  The
+     * D-Bus config has <listen>unix:dir=/tmp</listen>, and with that config the
+     * D-Bus specification [1] says that the daemon will create a socket file
+     * whose name matches /tmp/dbus-*.
+     *
+     * (If the configs had unix:tmpdir instead of unix:dir, dbus-daemon would be
+     * allowed, but not required, to create abstract sockets instead of
+     * file-based sockets.  Abstract sockets are unaffected by the redirection
+     * of /tmp to $LIGHTDM_TEST_ROOT because they don't actually exist in the
+     * filesystem.  That seems like a good feature in this case, but not all
+     * systems support abstract sockets, and starting with v1.15.2 dbus-daemon
+     * doesn't use abstract sockets even on systems that support them [2].
+     * Thus, an exception for /tmp/dbus-* is required here regardless.  To avoid
+     * platform-specific cold code paths, unix:dir is used to force the use of
+     * normal socket files.)
+     *
+     * [1] https://dbus.freedesktop.org/doc/dbus-specification.html#transports-unix-domain-sockets-addresses
+     * [2] https://gitlab.freedesktop.org/dbus/dbus/-/blob/35ade3c8f7aca16d1c6289828a2597859d1c503b/NEWS#L129-L147
+     */
+    if (g_str_has_prefix (path, "/tmp/dbus-"))
+        return g_strdup (path);
+
     if (g_str_has_prefix (path, "/tmp"))
         return g_build_filename (g_getenv ("LIGHTDM_TEST_ROOT"), "tmp", path + strlen ("/tmp"), NULL);
 
@@ -233,6 +266,7 @@ open_wrapper (const char *func, const char *pathname, int flags, mode_t mode)
     return _open (new_path, flags, mode);
 }
 
+#ifndef __USE_FILE_OFFSET64
 int
 open (const char *pathname, int flags, ...)
 {
@@ -246,6 +280,7 @@ open (const char *pathname, int flags, ...)
     }
     return open_wrapper ("open", pathname, flags, mode);
 }
+#endif
 
 int
 open64 (const char *pathname, int flags, ...)
@@ -279,6 +314,7 @@ unlinkat (int dirfd, const char *pathname, int flags)
     return _unlinkat (dirfd, new_path, flags);
 }
 
+#ifndef __USE_FILE_OFFSET64
 int
 creat (const char *pathname, mode_t mode)
 {
@@ -287,6 +323,7 @@ creat (const char *pathname, mode_t mode)
     g_autofree gchar *new_path = redirect_path (pathname);
     return _creat (new_path, mode);
 }
+#endif
 
 int
 creat64 (const char *pathname, mode_t mode)
@@ -311,6 +348,7 @@ access (const char *pathname, int mode)
     return _access (new_path, mode);
 }
 
+#ifndef __USE_FILE_OFFSET64
 int
 stat (const char *path, struct stat *buf)
 {
@@ -319,6 +357,7 @@ stat (const char *path, struct stat *buf)
     g_autofree gchar *new_path = redirect_path (path);
     return _stat (new_path, buf);
 }
+#endif
 
 int
 stat64 (const char *path, struct stat64 *buf)
@@ -1252,6 +1291,27 @@ pam_open_session (pam_handle_t *pamh, int flags)
         g_mkdir_with_parents (entry->pw_dir, 0755);
     }
 
+    if (strcmp (pamh->user, "change-home-dir") == 0)
+    {
+        struct passwd *entry = getpwnam (pamh->user);
+
+        /* Actual home dir is changed by PAM, differing from passwd, strip off
+           trailing /home/<user> and replace with /users/<user> */
+        const char *endp = pamh->user;
+        int slashes = 0;
+        while (*endp++ != '\0');
+        while (slashes < 2 && endp > pamh->user) {
+                if (*endp-- == '/')
+                        slashes++;
+        }
+        g_autofree gchar *changed_home = g_strdup_printf("%.*s/users/%s\n", (int)(endp - entry->pw_dir), entry->pw_dir, pamh->user);
+
+        g_mkdir_with_parents (changed_home, 0755);
+
+        g_autofree gchar *e = g_strdup_printf ("HOME=%s", changed_home);
+        pam_putenv (pamh, e);
+    }
+
     /* Open logind session */
     g_autoptr(GError) error = NULL;
     g_autoptr(GVariant) result = g_dbus_connection_call_sync (g_bus_get_sync (G_BUS_TYPE_SYSTEM, NULL, NULL),
@@ -1562,14 +1622,10 @@ pututxline (const struct utmpx *ut)
         default:
             g_string_append_printf (status, " TYPE=%d", ut->ut_type);
         }
-        if (ut->ut_line)
-            g_string_append_printf (status, " LINE=%s", ut->ut_line);
-        if (ut->ut_id)
-            g_string_append_printf (status, " ID=%s", ut->ut_id);
-        if (ut->ut_user)
-            g_string_append_printf (status, " USER=%s", ut->ut_user);
-        if (ut->ut_host)
-            g_string_append_printf (status, " HOST=%s", ut->ut_host);
+        g_string_append_printf (status, " LINE=%s", ut->ut_line);
+        g_string_append_printf (status, " ID=%s", ut->ut_id);
+        g_string_append_printf (status, " USER=%s", ut->ut_user);
+        g_string_append_printf (status, " HOST=%s", ut->ut_host);
         status_notify ("%s", status->str);
     }
 

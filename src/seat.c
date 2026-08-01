@@ -39,6 +39,9 @@ typedef struct
     /* TRUE if this seat can run multiple sessions at once */
     gboolean supports_multi_session;
 
+    /* TRUE if this seat has TTYs */
+    gboolean can_tty;
+
     /* TRUE if display server can be shared for sessions */
     gboolean share_display_server;
 
@@ -207,6 +210,14 @@ seat_set_share_display_server (Seat *seat, gboolean share_display_server)
     priv->share_display_server = share_display_server;
 }
 
+void
+seat_set_can_tty (Seat *seat, gboolean can_tty)
+{
+    SeatPrivate *priv = seat_get_instance_private (seat);
+    g_return_if_fail (seat != NULL);
+    priv->can_tty = can_tty;
+}
+
 gboolean
 seat_start (Seat *seat)
 {
@@ -216,7 +227,6 @@ seat_start (Seat *seat)
 
     l_debug (seat, "Starting");
 
-    SEAT_GET_CLASS (seat)->setup (seat);
     priv->started = SEAT_GET_CLASS (seat)->start (seat);
 
     return priv->started;
@@ -359,6 +369,14 @@ seat_get_can_switch (Seat *seat)
 }
 
 gboolean
+seat_get_can_tty (Seat *seat)
+{
+    SeatPrivate *priv = seat_get_instance_private (seat);
+    g_return_val_if_fail (seat != NULL, FALSE);
+    return priv->can_tty;
+}
+
+gboolean
 seat_get_allow_guest (Seat *seat)
 {
     g_return_val_if_fail (seat != NULL, FALSE);
@@ -366,7 +384,7 @@ seat_get_allow_guest (Seat *seat)
 }
 
 static gboolean
-run_script (Seat *seat, DisplayServer *display_server, const gchar *script_name, User *user)
+run_script (Seat *seat, DisplayServer *display_server, const gchar *script_name, User *user, const gchar *home_directory)
 {
     g_autoptr(Process) script = process_new (NULL, NULL);
 
@@ -393,7 +411,7 @@ run_script (Seat *seat, DisplayServer *display_server, const gchar *script_name,
     {
         process_set_env (script, "USER", user_get_name (user));
         process_set_env (script, "LOGNAME", user_get_name (user));
-        process_set_env (script, "HOME", user_get_home_directory (user));
+        process_set_env (script, "HOME", home_directory ? home_directory : user_get_home_directory (user));
     }
     else
         process_set_env (script, "HOME", "/");
@@ -458,7 +476,7 @@ display_server_stopped_cb (DisplayServer *display_server, Seat *seat)
     /* Run a script right after stopping the display server */
     const gchar *script = seat_get_string_property (seat, "display-stopped-script");
     if (script)
-        run_script (seat, NULL, script, NULL);
+        run_script (seat, NULL, script, NULL, NULL);
 
     g_signal_handlers_disconnect_matched (display_server, G_SIGNAL_MATCH_DATA, 0, 0, NULL, NULL, seat);
     priv->display_servers = g_list_remove (priv->display_servers, display_server);
@@ -655,7 +673,7 @@ run_session (Seat *seat, Session *session)
         script = seat_get_string_property (seat, "greeter-setup-script");
     else
         script = seat_get_string_property (seat, "session-setup-script");
-    if (script && !run_script (seat, session_get_display_server (session), script, session_get_user (session)))
+    if (script && !run_script (seat, session_get_display_server (session), script, session_get_user (session), session_get_home_directory (session)))
     {
         l_debug (seat, "Switching to greeter due to failed setup script");
         switch_to_greeter_from_failed_session (seat, session);
@@ -767,6 +785,8 @@ session_stopped_cb (Session *session, Seat *seat)
         g_clear_object (&priv->active_session);
     if (session == priv->next_session)
         g_clear_object (&priv->next_session);
+    /* We were waiting for this session, but it didn't start :( */
+    // FIXME: Start a greeter on this?
     if (session == priv->session_to_activate)
         g_clear_object (&priv->session_to_activate);
 
@@ -777,13 +797,8 @@ session_stopped_cb (Session *session, Seat *seat)
     {
         const gchar *script = seat_get_string_property (seat, "session-cleanup-script");
         if (script)
-            run_script (seat, display_server, script, session_get_user (session));
+            run_script (seat, display_server, script, session_get_user (session), session_get_home_directory (session));
     }
-
-    /* We were waiting for this session, but it didn't start :( */
-    // FIXME: Start a greeter on this?
-    if (session == priv->session_to_activate)
-        g_clear_object (&priv->session_to_activate);
 
     if (priv->stopping)
     {
@@ -1328,7 +1343,7 @@ display_server_ready_cb (DisplayServer *display_server, Seat *seat)
 {
     /* Run setup script */
     const gchar *script = seat_get_string_property (seat, "display-setup-script");
-    if (script && !run_script (seat, display_server, script, NULL))
+    if (script && !run_script (seat, display_server, script, NULL, NULL))
     {
         l_debug (seat, "Stopping display server due to failed setup script");
         display_server_stop (display_server);
@@ -1390,7 +1405,13 @@ start_display_server (Seat *seat, DisplayServer *display_server)
         return TRUE;
     }
     else
-        return display_server_start (display_server);
+    {
+        gboolean success = display_server_start (display_server);
+        if (!success) {
+            l_debug (seat, "Failed to start the display server");
+        }
+        return success;
+    }
 }
 
 gboolean
@@ -1399,9 +1420,6 @@ seat_switch_to_greeter (Seat *seat)
     SeatPrivate *priv = seat_get_instance_private (seat);
 
     g_return_val_if_fail (seat != NULL, FALSE);
-
-    if (!seat_get_can_switch (seat) && priv->sessions != NULL)
-        return FALSE;
 
     /* Switch to greeter if one open */
     GreeterSession *greeter_session = find_greeter_session (seat);
@@ -1412,15 +1430,25 @@ seat_switch_to_greeter (Seat *seat)
         return TRUE;
     }
 
+    if (!seat_get_can_switch (seat) && priv->sessions != NULL)
+    {
+        l_debug (seat, "Unable to switch to greeter because the seat already has a session and does not support session switching");
+        return FALSE;
+    }
+
     greeter_session = create_greeter_session (seat);
     if (!greeter_session)
+    {
+        l_debug (seat, "Failed to create a greeter session");
         return FALSE;
+    }
 
     g_clear_object (&priv->session_to_activate);
     priv->session_to_activate = g_object_ref (SESSION (greeter_session));
 
     DisplayServer *display_server = create_display_server (seat, SESSION (greeter_session));
     if (!display_server) {
+        l_debug (seat, "Failed to create a display server for the new greeter session");
         g_clear_object (&priv->session_to_activate);
         return FALSE;
     }
@@ -1668,11 +1696,6 @@ seat_get_is_stopping (Seat *seat)
     SeatPrivate *priv = seat_get_instance_private (seat);
     g_return_val_if_fail (seat != NULL, FALSE);
     return priv->stopping;
-}
-
-static void
-seat_real_setup (Seat *seat)
-{
 }
 
 static gboolean
@@ -1932,7 +1955,6 @@ seat_class_init (SeatClass *klass)
 {
     GObjectClass *object_class = G_OBJECT_CLASS (klass);
 
-    klass->setup = seat_real_setup;
     klass->start = seat_real_start;
     klass->create_display_server = seat_real_create_display_server;
     klass->display_server_is_used = seat_real_display_server_is_used;
