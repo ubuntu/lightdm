@@ -136,7 +136,7 @@ display_number_in_use (guint display_number)
     }
 
     /* See if an X server that we don't know of has a lock on that number */
-    g_autofree gchar *path = g_strdup_printf ("/tmp/.X%d-lock", display_number);
+    g_autofree gchar *path = g_strdup_printf ("/tmp/.X%u-lock", display_number);
     gboolean in_use = g_file_test (path, G_FILE_TEST_EXISTS);
 
     /* See if that lock file is valid, ignore it if the contents are invalid or the process doesn't exist */
@@ -370,7 +370,7 @@ got_signal_cb (Process *process, int signum, XServerLocal *server)
     if (signum == SIGUSR1 && !priv->got_signal)
     {
         priv->got_signal = TRUE;
-        l_debug (server, "Got signal from X server :%d", priv->display_number);
+        l_debug (server, "Got signal from X server :%u", priv->display_number);
 
         // FIXME: Check return value
         DISPLAY_SERVER_CLASS (x_server_local_parent_class)->start (DISPLAY_SERVER (server));
@@ -455,7 +455,7 @@ x_server_local_start (DisplayServer *display_server)
     g_signal_connect (priv->x_server_process, PROCESS_SIGNAL_STOPPED, G_CALLBACK (stopped_cb), server);
 
     /* Setup logging */
-    g_autofree gchar *filename = g_strdup_printf ("x-%d.log", x_server_get_display_number (X_SERVER (server)));
+    g_autofree gchar *filename = g_strdup_printf ("x-%u.log", x_server_get_display_number (X_SERVER (server)));
     g_autofree gchar *dir = config_get_string (config_get_instance (), "LightDM", "log-directory");
     g_autofree gchar *log_file = g_build_filename (dir, filename, NULL);
     gboolean backup_logs = config_get_boolean (config_get_instance (), "LightDM", "backup-logs");
@@ -477,7 +477,7 @@ x_server_local_start (DisplayServer *display_server)
 
     /* The display argument must be given first when the X server used
      * is Xvnc. */
-    g_string_append_printf (command, " :%d", priv->display_number);
+    g_string_append_printf (command, " :%u", priv->display_number);
 
     if (priv->config_file)
         g_string_append_printf (command, " -config %s", priv->config_file);
@@ -496,7 +496,7 @@ x_server_local_start (DisplayServer *display_server)
     if (priv->xdmcp_server != NULL)
     {
         if (priv->xdmcp_port != 0)
-            g_string_append_printf (command, " -port %d", priv->xdmcp_port);
+            g_string_append_printf (command, " -port %u", priv->xdmcp_port);
         g_string_append_printf (command, " -query %s", priv->xdmcp_server);
         if (priv->xdmcp_key)
             g_string_append_printf (command, " -cookie %s", priv->xdmcp_key);
@@ -556,7 +556,7 @@ x_server_local_start (DisplayServer *display_server)
 
     gboolean result = process_start (priv->x_server_process, FALSE);
     if (result)
-        l_debug (display_server, "Waiting for ready signal from X server :%d", priv->display_number);
+        l_debug (display_server, "Waiting for ready signal from X server :%u", priv->display_number);
     else
         stopped_cb (priv->x_server_process, X_SERVER_LOCAL (server));
 
@@ -623,7 +623,7 @@ x_server_local_real_logprefix (Logger *self, gchar *buf, gulong buflen)
 {
     XServerLocal *server = X_SERVER_LOCAL (self);
     XServerLocalPrivate *priv = x_server_local_get_instance_private (server);
-    return g_snprintf (buf, buflen, "XServer %d: ", priv->display_number);
+    return g_snprintf (buf, buflen, "XServer %u: ", priv->display_number);
 }
 
 static void
