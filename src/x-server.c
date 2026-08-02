@@ -74,9 +74,9 @@ x_server_get_address (XServer *server)
     if (!priv->address)
     {
         if (priv->hostname)
-            priv->address = g_strdup_printf("%s:%d", priv->hostname, x_server_get_display_number (server));
+            priv->address = g_strdup_printf("%s:%u", priv->hostname, x_server_get_display_number (server));
         else
-            priv->address = g_strdup_printf(":%d", x_server_get_display_number (server));
+            priv->address = g_strdup_printf(":%u", x_server_get_display_number (server));
     }
 
     return priv->address;
@@ -103,7 +103,7 @@ x_server_set_local_authority (XServer *server)
 
     g_clear_object (&priv->authority);
     char display_number[12];
-    g_snprintf(display_number, sizeof(display_number), "%d", x_server_get_display_number (server));
+    g_snprintf(display_number, sizeof(display_number), "%u", x_server_get_display_number (server));
 
     gethostname (priv->local_hostname, 1024);
     priv->authority = x_authority_new_cookie (XAUTH_FAMILY_LOCAL, (guint8 *) priv->local_hostname, strlen (priv->local_hostname), display_number);
@@ -157,11 +157,13 @@ x_server_start (DisplayServer *display_server)
     }
 
     /* Open connection */
-    l_debug (server, "Connecting to XServer %s", x_server_get_address (server));
-    priv->connection = xcb_connect_to_display_with_auth_info (x_server_get_address (server), auth, NULL);
+    const gchar *address = x_server_get_address (server);
+    l_debug (server, "Connecting to XServer %s", address ? address : "(null)");
+
+    priv->connection = xcb_connect_to_display_with_auth_info (address, auth, NULL);
     if (xcb_connection_has_error (priv->connection))
     {
-        l_debug (server, "Error connecting to XServer %s", x_server_get_address (server));
+        l_debug (server, "Error connecting to XServer %s", address ? address : "(null)");
         return FALSE;
     }
 
