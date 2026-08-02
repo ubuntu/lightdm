@@ -122,6 +122,8 @@ load_sessions_dir (GList *sessions, const gchar *sessions_dir, const gchar *defa
     if (!directory)
         return sessions;
 
+    const size_t ext_len = strlen(".desktop");
+
     while (TRUE)
     {
         const gchar *filename = g_dir_read_name (directory);
@@ -141,7 +143,7 @@ load_sessions_dir (GList *sessions, const gchar *sessions_dir, const gchar *defa
 
         if (result)
         {
-            g_autofree gchar *key = g_strndup (filename, strlen (filename) - strlen (".desktop"));
+            g_autofree gchar *key = g_strndup (filename, strlen(filename) - ext_len);
             LightDMSession *session = load_session (key_file, key, default_type);
             LightDMSessionPrivate *priv = lightdm_session_get_instance_private (session);
             if (session)

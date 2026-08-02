@@ -295,11 +295,13 @@ find_env_entry (Session *session, const gchar *name)
 {
     SessionPrivate *priv = session_get_instance_private (session);
 
+    const size_t name_len = strlen (name);
+
     for (GList *link = priv->env; link; link = link->next)
     {
         const gchar *entry = link->data;
 
-        if (g_str_has_prefix (entry, name) && entry[strlen (name)] == '=')
+        if (g_str_has_prefix (entry, name) && entry[name_len] == '=')
             return link;
     }
 

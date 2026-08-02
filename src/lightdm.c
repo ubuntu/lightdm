@@ -123,11 +123,12 @@ get_config_sections (const gchar *seat_name)
     GList *config_sections = g_list_append (NULL, g_strdup ("Seat:*"));
 
     g_auto(GStrv) groups = config_get_groups (config_get_instance ());
+    const size_t seat_len = strlen ("Seat:");
     for (gchar **i = groups; *i; i++)
     {
         if (g_str_has_prefix (*i, "Seat:") && strcmp (*i, "Seat:*") != 0)
         {
-            const gchar *seat_name_glob = *i + strlen ("Seat:");
+            const gchar *seat_name_glob = *i + seat_len;
             if (g_pattern_match_simple (seat_name_glob, seat_name ? seat_name : ""))
                 config_sections = g_list_append (config_sections, g_strdup (*i));
         }

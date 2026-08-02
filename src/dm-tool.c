@@ -284,13 +284,14 @@ main (int argc, char **argv)
         g_autoptr(GVariantIter) seat_iter = NULL;
         g_variant_get (seats, "ao", &seat_iter);
         gchar *seat_path;
+        const size_t prefix_len = strlen ("/org/freedesktop/DisplayManager/");
         while (g_variant_iter_loop (seat_iter, "&o", &seat_path))
         {
             gchar *seat_name;
             g_autoptr(GDBusProxy) proxy = NULL;
 
             if (g_str_has_prefix (seat_path, "/org/freedesktop/DisplayManager/"))
-                seat_name = seat_path + strlen ("/org/freedesktop/DisplayManager/");
+                seat_name = seat_path + prefix_len;
             else
                 seat_name = seat_path;
 
@@ -327,7 +328,7 @@ main (int argc, char **argv)
             {
                 const gchar *session_name;
                 if (g_str_has_prefix (session_path, "/org/freedesktop/DisplayManager/"))
-                    session_name = session_path + strlen ("/org/freedesktop/DisplayManager/");
+                    session_name = session_path + prefix_len;
                 else
                     session_name = session_path;
 
