@@ -118,6 +118,12 @@ display_manager_add_seat (DisplayManager *manager, Seat *seat)
     g_signal_connect (seat, SEAT_SIGNAL_STOPPED, G_CALLBACK (seat_stopped_cb), manager);
     g_signal_emit (manager, signals[SEAT_ADDED], 0, seat);
 
+    // when is stoping and the new seat not yet add to seats,need call stop the new seat
+    if (priv->stopping) {
+        g_debug ("Stopping new started seat");
+        seat_stop (seat);
+    }
+
     return TRUE;
 }
 
