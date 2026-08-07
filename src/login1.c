@@ -196,6 +196,7 @@ add_seat (Login1Service *service, const gchar *id, const gchar *path)
 
         const gchar *name;
         GVariant *value;
+        s_priv->can_multi_session = TRUE;
         while (g_variant_iter_loop (properties, "{&sv}", &name, &value))
         {
             if (strcmp (name, "CanGraphical") == 0 && g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN))
