@@ -383,7 +383,7 @@ pam_messages_cb (Session *session, Greeter *greeter)
     size_t messages_length = session_get_messages_length (session);
 
     /* Respond to d-bus query with messages */
-    g_debug ("Prompt greeter with %zi message(s)", messages_length);
+    g_debug ("Prompt greeter with %zu message(s)", messages_length);
     guint32 size = int_length () + string_length (session_get_username (session)) + int_length ();
     for (int i = 0; i < messages_length; i++)
         size += int_length () + string_length (messages[i].msg);
@@ -810,7 +810,7 @@ read_int (Greeter *greeter, gsize *offset)
 
     if (priv->n_read - *offset < sizeof (guint32))
     {
-        g_warning ("Not enough space for int, need %zu, got %zu", sizeof (guint32), priv->n_read - *offset);
+        g_warning ("Not enough space for int, need %zu, got %" G_GSIZE_FORMAT, sizeof (guint32), priv->n_read - *offset);
         return 0;
     }
     guint8 *buffer = priv->read_buffer + *offset;
@@ -845,7 +845,7 @@ read_string_full (Greeter *greeter, gsize *offset, void* (*alloc_fn)(size_t n))
     guint32 length = read_int (greeter, offset);
     if (priv->n_read - *offset < length)
     {
-        g_warning ("Not enough space for string, need %u, got %zu", length, priv->n_read - *offset);
+        g_warning ("Not enough space for string, need %u, got %" G_GSIZE_FORMAT, length, priv->n_read - *offset);
         return g_strdup ("");
     }
 
