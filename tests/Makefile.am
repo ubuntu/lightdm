@@ -72,6 +72,7 @@ TESTS = \
 	test-session-stderr-backup \
 	test-xauthority \
 	test-corrupt-xauthority \
+	test-stale-xauthority \
 	test-system-xauthority \
 	test-sessions-gobject \
 	test-user-renamed \
@@ -432,6 +433,7 @@ EXTRA_DIST = \
 	scripts/console-kit.conf \
 	scripts/console-kit-no-xdg-runtime.conf \
 	scripts/corrupt-xauthority.conf \
+	scripts/stale-xauthority.conf \
 	scripts/crash-authenticate.conf \
 	scripts/cred-error.conf \
 	scripts/cred-expired.conf \
