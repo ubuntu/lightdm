@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: lightdm\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2018-06-21 12:34+1200\n"
+"POT-Creation-Date: 2026-08-12 09:39-0400\n"
 "PO-Revision-Date: 2018-11-14 19:54+0800\n"
 "Last-Translator: pan93412 <pan93412@gmail.com>\n"
 "Language-Team: Chinese (Traditional) <zh_TW@li.org>\n"
@@ -39,57 +39,57 @@ msgid "Authentication is required to set another user's greeter properties."
 msgstr "設定其他使用者的 greeter 屬性需要身份核對。"
 
 #. Arguments and description for --help test
-#: ../src/lightdm.c:568
+#: ../src/lightdm.c:585
 msgid "- Display Manager"
 msgstr "- 顯示管理器"
 
 #. Help string for command line --config flag
-#: ../src/lightdm.c:579
+#: ../src/lightdm.c:596
 msgid "Use configuration file"
 msgstr "使用設定檔"
 
 #. Help string for command line --debug flag
-#: ../src/lightdm.c:582
+#: ../src/lightdm.c:599
 msgid "Print debugging messages"
 msgstr "顯示偵錯訊息"
 
 #. Help string for command line --test-mode flag
-#: ../src/lightdm.c:585
+#: ../src/lightdm.c:602
 msgid "Run as unprivileged user, skipping things that require root access"
 msgstr "以無特權使用者身份執行，跳過需要 root 存取權限的設定"
 
 #. Help string for command line --pid-file flag
-#: ../src/lightdm.c:588
+#: ../src/lightdm.c:605
 msgid "File to write PID into"
 msgstr "要寫入 PID 的檔案"
 
 #. Help string for command line --log-dir flag
-#: ../src/lightdm.c:591
+#: ../src/lightdm.c:608
 msgid "Directory to write logs to"
 msgstr "要寫入日誌檔案的目錄"
 
 #. Help string for command line --run-dir flag
-#: ../src/lightdm.c:594
+#: ../src/lightdm.c:611
 msgid "Directory to store running state"
 msgstr "要存放執行狀態的目錄"
 
 #. Help string for command line --cache-dir flag
-#: ../src/lightdm.c:597
+#: ../src/lightdm.c:614
 msgid "Directory to cache information"
 msgstr "要快取資訊的目錄"
 
 #. Help string for command line --show-config flag
-#: ../src/lightdm.c:600
+#: ../src/lightdm.c:617
 msgid "Show combined configuration"
 msgstr "顯示結合設定"
 
 #. Help string for command line --version flag
-#: ../src/lightdm.c:603
+#: ../src/lightdm.c:620
 msgid "Show release version"
 msgstr "顯示釋出版本"
 
 #. Text printed out when an unknown command-line argument provided
-#: ../src/lightdm.c:614
+#: ../src/lightdm.c:631
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr "執行「%s --help」顯示可用指令列選項的完整列表。"
@@ -97,13 +97,16 @@ msgstr "執行「%s --help」顯示可用指令列選項的完整列表。"
 #. Text printed out when an unknown command-line argument provided
 #: ../src/dm-tool.c:29
 #, c-format
-msgid "Run 'dm-tool --help' to see a full list of available command line options."
+msgid ""
+"Run 'dm-tool --help' to see a full list of available command line options."
 msgstr "執行「dm-tool --help」顯示可用指令列選項的完整列表。"
 
-#~ msgid "Are you sure you want to close all programs and restart the computer?"
+#~ msgid ""
+#~ "Are you sure you want to close all programs and restart the computer?"
 #~ msgstr "您確定要關閉所有程式，並重新啟動電腦？"
 
-#~ msgid "Are you sure you want to close all programs and shutdown the computer?"
+#~ msgid ""
+#~ "Are you sure you want to close all programs and shutdown the computer?"
 #~ msgstr "您確定要關閉所有程式，並關閉電腦？"
 
 #~ msgid "Large Font"
