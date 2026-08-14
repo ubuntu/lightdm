@@ -100,36 +100,3 @@ msgstr ""
 msgid ""
 "Run 'dm-tool --help' to see a full list of available command line options."
 msgstr ""
-
-#~ msgid ""
-#~ "Are you sure you want to close all programs and restart the computer?"
-#~ msgstr ""
-#~ "আপনি কি নিশ্চিত আপনি সব প্রোগ্রাম বন্ধ করে কম্পিউটার পুনরায় আরম্ভ করতে চান?"
-
-#~ msgid "Cancel"
-#~ msgstr "বাতিল"
-
-#~ msgid "Restart"
-#~ msgstr "পুনরায় আরম্ভ"
-
-#~ msgid ""
-#~ "Are you sure you want to close all programs and shutdown the computer?"
-#~ msgstr "আপনি কি নিশ্চিত আপনি সব প্রোগ্রাম বন্ধ করে কম্পিউটার বন্ধ করতে চান?"
-
-#~ msgid "Shutdown"
-#~ msgstr "বন্ধ করুন"
-
-#~ msgid "Large Font"
-#~ msgstr "বড় ফন্ট"
-
-#~ msgid "Suspend"
-#~ msgstr "স্থগিত করুন"
-
-#~ msgid "Hibernate"
-#~ msgstr "নিদ্রিত অবস্থায় রাখুন"
-
-#~ msgid "Restart..."
-#~ msgstr "পুনরায় আরম্ভ..."
-
-#~ msgid "Shutdown..."
-#~ msgstr "বন্ধ করুন..."

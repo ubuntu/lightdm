@@ -100,22 +100,3 @@ msgstr ""
 msgid ""
 "Run 'dm-tool --help' to see a full list of available command line options."
 msgstr ""
-
-#~ msgid "Cancel"
-#~ msgstr "വേണ്ട"
-
-#~ msgid ""
-#~ "Are you sure you want to close all programs and shutdown the computer?"
-#~ msgstr "എല്ലാ പ്രോഗ്രാമുകളും അടചിട്ട്‌ കംപ്യൂട്ടര്‍ നിര്‍ത്തട്ടെ?"
-
-#~ msgid "Large Font"
-#~ msgstr "വലിയ  ഫോണ്ട്"
-
-#~ msgid "Hibernate"
-#~ msgstr "ശിശിര നിദ്ര"
-
-#~ msgid "Restart..."
-#~ msgstr "പുനരാരംഭിക്കുക"
-
-#~ msgid "Shutdown..."
-#~ msgstr "നിര്‍ത്തുക"

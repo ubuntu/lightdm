@@ -100,35 +100,3 @@ msgstr ""
 msgid ""
 "Run 'dm-tool --help' to see a full list of available command line options."
 msgstr ""
-
-#~ msgid ""
-#~ "Are you sure you want to close all programs and restart the computer?"
-#~ msgstr "คุณแน่ใจหรือไม่ที่จะปิดโปรแกรมทั้งหมดและเริ่มเปิดเครื่องคอมพิวเตอร์ใหม่"
-
-#~ msgid "Cancel"
-#~ msgstr "ยกเลิก"
-
-#~ msgid "Restart"
-#~ msgstr "เริ่มใหม่"
-
-#~ msgid ""
-#~ "Are you sure you want to close all programs and shutdown the computer?"
-#~ msgstr "คุณแน่ใจว่าต้องการปิดโปรแกรมทั้งหมดแล้วปิดเครื่อง"
-
-#~ msgid "Shutdown"
-#~ msgstr "ปิดเครื่อง"
-
-#~ msgid "Large Font"
-#~ msgstr "แบบตัวอักษรขนาดใหญ่"
-
-#~ msgid "Suspend"
-#~ msgstr "ปิดพักเครื่อง"
-
-#~ msgid "Hibernate"
-#~ msgstr "หยุดพักเครื่อง"
-
-#~ msgid "Restart..."
-#~ msgstr "เริ่มใหม่..."
-
-#~ msgid "Shutdown..."
-#~ msgstr "ปิดเครื่อง..."

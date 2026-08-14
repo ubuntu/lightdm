@@ -100,36 +100,3 @@ msgstr ""
 msgid ""
 "Run 'dm-tool --help' to see a full list of available command line options."
 msgstr ""
-
-#~ msgid ""
-#~ "Are you sure you want to close all programs and restart the computer?"
-#~ msgstr ""
-#~ "Bi rastî dixwazî hemû bernameyan bigirî û komputerê dîsa bidî destpêkirin?"
-
-#~ msgid "Cancel"
-#~ msgstr "Betal"
-
-#~ msgid "Restart"
-#~ msgstr "Dîsdestpêkirin"
-
-#~ msgid ""
-#~ "Are you sure you want to close all programs and shutdown the computer?"
-#~ msgstr "Bi rastî dixwazî hemû bernameyan û komputerê bigirî?"
-
-#~ msgid "Shutdown"
-#~ msgstr "Girtin"
-
-#~ msgid "Large Font"
-#~ msgstr "Curenivîsê mezin"
-
-#~ msgid "Suspend"
-#~ msgstr "Xew"
-
-#~ msgid "Hibernate"
-#~ msgstr "Xewa kûr"
-
-#~ msgid "Restart..."
-#~ msgstr "Dîsdestpêkirin..."
-
-#~ msgid "Shutdown..."
-#~ msgstr "Girtin..."

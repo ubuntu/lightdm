@@ -100,33 +100,3 @@ msgstr ""
 msgid ""
 "Run 'dm-tool --help' to see a full list of available command line options."
 msgstr ""
-
-#~ msgid ""
-#~ "Are you sure you want to close all programs and restart the computer?"
-#~ msgstr ""
-#~ "A bheil thu cinnteach gu bheil thu airson gach prògram a dhùnadh is an "
-#~ "coimpiutair ath-thòiseachadh?"
-
-#~ msgid "Cancel"
-#~ msgstr "Sguir dheth"
-
-#~ msgid "Restart"
-#~ msgstr "Ath-thòisich"
-
-#~ msgid ""
-#~ "Are you sure you want to close all programs and shutdown the computer?"
-#~ msgstr ""
-#~ "A bheil thu cinnteach gu bheil thu airson gach prògram a dhùnadh agus an "
-#~ "coimpiutair a chur dheth?"
-
-#~ msgid "Shutdown"
-#~ msgstr "Dùin sìos"
-
-#~ msgid "Suspend"
-#~ msgstr "Cuir dàil ann"
-
-#~ msgid "Hibernate"
-#~ msgstr "Dèan cadal-geamhraidh"
-
-#~ msgid "Restart..."
-#~ msgstr "Ath-thòisich..."

@@ -100,31 +100,3 @@ msgstr ""
 msgid ""
 "Run 'dm-tool --help' to see a full list of available command line options."
 msgstr ""
-
-#~ msgid ""
-#~ "Are you sure you want to close all programs and restart the computer?"
-#~ msgstr "모든 프로그램을 닫고 컴퓨터를 다시 시작하겠습니까?"
-
-#~ msgid "Cancel"
-#~ msgstr "취소"
-
-#~ msgid "Restart"
-#~ msgstr "다시 시작"
-
-#~ msgid "Shutdown"
-#~ msgstr "컴퓨터 끄기"
-
-#~ msgid "Large Font"
-#~ msgstr "큰 글꼴"
-
-#~ msgid "Suspend"
-#~ msgstr "절전모드"
-
-#~ msgid "Hibernate"
-#~ msgstr "최대 절전 모드"
-
-#~ msgid "Restart..."
-#~ msgstr "재시작..."
-
-#~ msgid "Shutdown..."
-#~ msgstr "컴퓨터 끄기..."

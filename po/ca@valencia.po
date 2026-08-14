@@ -100,37 +100,3 @@ msgstr ""
 msgid ""
 "Run 'dm-tool --help' to see a full list of available command line options."
 msgstr ""
-
-#~ msgid ""
-#~ "Are you sure you want to close all programs and restart the computer?"
-#~ msgstr ""
-#~ "Esteu segur que voleu tancar tots els programes i reiniciar l'ordinador?"
-
-#~ msgid "Cancel"
-#~ msgstr "Cancel·la"
-
-#~ msgid "Restart"
-#~ msgstr "Reinicia"
-
-#~ msgid ""
-#~ "Are you sure you want to close all programs and shutdown the computer?"
-#~ msgstr ""
-#~ "Esteu segur que voleu tancar tots els programes i aturar l'ordinador?"
-
-#~ msgid "Shutdown"
-#~ msgstr "Atura"
-
-#~ msgid "Large Font"
-#~ msgstr "Mida de lletra gran"
-
-#~ msgid "Suspend"
-#~ msgstr "Atura temporalment"
-
-#~ msgid "Hibernate"
-#~ msgstr "Hiberna"
-
-#~ msgid "Restart..."
-#~ msgstr "Reinicia..."
-
-#~ msgid "Shutdown..."
-#~ msgstr "Atura..."

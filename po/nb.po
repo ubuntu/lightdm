@@ -100,37 +100,3 @@ msgstr ""
 msgid ""
 "Run 'dm-tool --help' to see a full list of available command line options."
 msgstr ""
-
-#~ msgid ""
-#~ "Are you sure you want to close all programs and restart the computer?"
-#~ msgstr ""
-#~ "Er du sikker på at du vil lukke alle programmer og starte datamaskinen på "
-#~ "nytt?"
-
-#~ msgid "Cancel"
-#~ msgstr "Avbryt"
-
-#~ msgid "Restart"
-#~ msgstr "Start på nytt"
-
-#~ msgid ""
-#~ "Are you sure you want to close all programs and shutdown the computer?"
-#~ msgstr "Ønsker du å lukke alle programmer og starte datamaskinen på nytt?"
-
-#~ msgid "Shutdown"
-#~ msgstr "Slå av"
-
-#~ msgid "Large Font"
-#~ msgstr "Stor skrift"
-
-#~ msgid "Suspend"
-#~ msgstr "Hvilemodus"
-
-#~ msgid "Hibernate"
-#~ msgstr "Dvalemodus"
-
-#~ msgid "Restart..."
-#~ msgstr "Omstart..."
-
-#~ msgid "Shutdown..."
-#~ msgstr "Slå av..."

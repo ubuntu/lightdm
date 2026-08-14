@@ -100,38 +100,3 @@ msgstr ""
 msgid ""
 "Run 'dm-tool --help' to see a full list of available command line options."
 msgstr ""
-
-#~ msgid ""
-#~ "Are you sure you want to close all programs and restart the computer?"
-#~ msgstr ""
-#~ "Secur que tu vole clauder tote le programmas e reinitiar le computator?"
-
-#~ msgid "Cancel"
-#~ msgstr "Cancellar"
-
-#~ msgid "Restart"
-#~ msgstr "Re-initiar"
-
-#~ msgid "Options"
-#~ msgstr "Optiones"
-
-#~ msgid "Language"
-#~ msgstr "Lingua"
-
-#~ msgid "Keyboard Layout"
-#~ msgstr "Disposition de claviero"
-
-#~ msgid "Session"
-#~ msgstr "Session"
-
-#~ msgid "Suspend"
-#~ msgstr "Suspender"
-
-#~ msgid "Hibernate"
-#~ msgstr "Hibernar"
-
-#~ msgid "Restart..."
-#~ msgstr "Reinitiar..."
-
-#~ msgid "Shutdown..."
-#~ msgstr "Clauder omne..."
