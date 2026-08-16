@@ -223,12 +223,15 @@ signal_cb (GDBusConnection *connection,
     {
         const gchar *id, *path;
         g_variant_get (parameters, "(&s&o)", &id, &path);
-
-        Login1Seat *seat = login1_service_get_seat (service, id);
-        if (!seat)
-        {
-            seat = add_seat (service, id, path);
-            g_signal_emit (service, service_signals[SEAT_ADDED], 0, seat);
+        // Fix the issue of repeated initialization of seat0 caused by signal_cb callback 
+        // probability executing in asynchronous threads
+        if (priv->connected) {
+            Login1Seat *seat = login1_service_get_seat (service, id);
+            if (!seat)
+            {
+                seat = add_seat (service, id, path);
+                g_signal_emit (service, service_signals[SEAT_ADDED], 0, seat);
+            }
         }
     }
     else if (strcmp (signal_name, "SeatRemoved") == 0)
@@ -236,11 +239,13 @@ signal_cb (GDBusConnection *connection,
         const gchar *id, *path;
         g_variant_get (parameters, "(&s&o)", &id, &path);
 
-        g_autoptr(Login1Seat) seat = login1_service_get_seat (service, id);
-        if (seat)
-        {
-            priv->seats = g_list_remove (priv->seats, seat);
-            g_signal_emit (service, service_signals[SEAT_REMOVED], 0, seat);
+        if (priv->connected) {
+            g_autoptr(Login1Seat) seat = login1_service_get_seat (service, id);
+            if (seat)
+            {
+                priv->seats = g_list_remove (priv->seats, seat);
+                g_signal_emit (service, service_signals[SEAT_REMOVED], 0, seat);
+            }
         }
     }
 }
