@@ -159,9 +159,33 @@ x_server_start (DisplayServer *display_server)
     /* Open connection */
     l_debug (server, "Connecting to XServer %s", x_server_get_address (server));
     priv->connection = xcb_connect_to_display_with_auth_info (x_server_get_address (server), auth, NULL);
-    if (xcb_connection_has_error (priv->connection))
+    int error_code = xcb_connection_has_error (priv->connection);
+    if (error_code)
     {
-        l_debug (server, "Error connecting to XServer %s", x_server_get_address (server));
+        l_debug (server, "Error connecting to XServer %s， error code:%d", x_server_get_address (server), error_code);
+        switch (error_code) {
+        case XCB_CONN_ERROR:
+            l_debug (server, "XCB connection error: Socket, Pipe or I/O error\n");
+            break;
+        case XCB_CONN_CLOSED_EXT_NOTSUPPORTED:
+            l_debug (server, "XCB connection error: Extension not supported\n");
+            break;
+        case XCB_CONN_CLOSED_MEM_INSUFFICIENT:
+            l_debug (server, "XCB connection error: Memory insufficient\n");
+            break;
+        case XCB_CONN_CLOSED_REQ_LEN_EXCEED:
+            l_debug (server, "XCB connection error: Request length exceeded\n");
+            break;
+        case XCB_CONN_CLOSED_PARSE_ERR:
+            l_debug (server, "XCB connection error: Can't parse display string\n");
+            break;
+        case XCB_CONN_CLOSED_INVALID_SCREEN:
+            l_debug (server, "XCB connection error: Invalid screen\n");
+            break;
+        default:
+            l_debug (server, "XCB connection error: Unknown error (%d)\n", error_code);
+            break;
+        }
         return FALSE;
     }
 
