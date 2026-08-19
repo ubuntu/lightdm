@@ -26,6 +26,7 @@
 #include "display-manager-service.h"
 #include "xdmcp-server.h"
 #include "vnc-server.h"
+#include "vt.h"
 #include "seat-xdmcp-session.h"
 #include "seat-xvnc.h"
 #include "x-server.h"
@@ -122,11 +123,12 @@ get_config_sections (const gchar *seat_name)
     GList *config_sections = g_list_append (NULL, g_strdup ("Seat:*"));
 
     g_auto(GStrv) groups = config_get_groups (config_get_instance ());
+    const size_t seat_len = strlen ("Seat:");
     for (gchar **i = groups; *i; i++)
     {
         if (g_str_has_prefix (*i, "Seat:") && strcmp (*i, "Seat:*") != 0)
         {
-            const gchar *seat_name_glob = *i + strlen ("Seat:");
+            const gchar *seat_name_glob = *i + seat_len;
             if (g_pattern_match_simple (seat_name_glob, seat_name ? seat_name : ""))
                 config_sections = g_list_append (config_sections, g_strdup (*i));
         }
@@ -423,11 +425,9 @@ add_login1_seat (Login1Seat *login1_seat)
     {
         set_seat_properties (seat, seat_name);
 
-        gboolean can_multi_session = login1_seat_get_can_multi_session (login1_seat);
         gboolean can_tty = login1_seat_get_can_tty (login1_seat);
-        if (!can_multi_session)
-            g_debug ("Seat %s has property CanMultiSession=no", seat_name);
-        seat_set_supports_multi_session (seat, can_multi_session);
+
+        seat_set_supports_multi_session (seat, TRUE);
         seat_set_can_tty (seat, can_tty);
 
         if (is_seat0)
@@ -926,6 +926,10 @@ main (int argc, char **argv)
             {
                 set_seat_properties (seat, NULL);
                 seat_set_property (seat, "exit-on-failure", "true");
+
+                /* in the absence of login1 we find out this using our own heuristics */
+                seat_set_can_tty (seat, vt_can_multi_seat ());
+
                 if (!display_manager_add_seat (display_manager, seat))
                     return EXIT_FAILURE;
             }

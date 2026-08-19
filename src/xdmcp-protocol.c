@@ -478,7 +478,7 @@ xdmcp_packet_tostring (XDMCPPacket *packet)
     {
         g_autofree gchar *authentication_text = data_tostring (&packet->Accept.authentication_data);
         g_autofree gchar *authorization_text = data_tostring (&packet->Accept.authorization_data);
-        return g_strdup_printf ("Accept(session_id=%d authentication_name='%s' authentication_data=%s authorization_name='%s' authorization_data=%s)",
+        return g_strdup_printf ("Accept(session_id=%u authentication_name='%s' authentication_data=%s authorization_name='%s' authorization_data=%s)",
                                 packet->Accept.session_id, packet->Accept.authentication_name, authentication_text,
                                 packet->Accept.authorization_name, authorization_text);
     }
@@ -489,17 +489,17 @@ xdmcp_packet_tostring (XDMCPPacket *packet)
                                 packet->Decline.status, packet->Decline.authentication_name, t);
     }
     case XDMCP_Manage:
-        return g_strdup_printf ("Manage(session_id=%d display_number=%d display_class='%s')",
+        return g_strdup_printf ("Manage(session_id=%u display_number=%d display_class='%s')",
                                 packet->Manage.session_id, packet->Manage.display_number, packet->Manage.display_class);
     case XDMCP_Refuse:
-        return g_strdup_printf ("Refuse(session_id=%d)", packet->Refuse.session_id);
+        return g_strdup_printf ("Refuse(session_id=%u)", packet->Refuse.session_id);
     case XDMCP_Failed:
-        return g_strdup_printf ("Failed(session_id=%d status='%s')", packet->Failed.session_id, packet->Failed.status);
+        return g_strdup_printf ("Failed(session_id=%u status='%s')", packet->Failed.session_id, packet->Failed.status);
     case XDMCP_KeepAlive:
-        return g_strdup_printf ("KeepAlive(display_number=%d session_id=%d)",
+        return g_strdup_printf ("KeepAlive(display_number=%d session_id=%u)",
                                 packet->KeepAlive.display_number, packet->KeepAlive.session_id);
     case XDMCP_Alive:
-        return g_strdup_printf ("Alive(session_running=%s session_id=%d)",
+        return g_strdup_printf ("Alive(session_running=%s session_id=%u)",
                                 packet->Alive.session_running ? "true" : "false", packet->Alive.session_id);
     default:
         return g_strdup_printf ("XDMCPPacket(opcode=%d)", packet->opcode);

@@ -1,5 +1,5 @@
 # LightDM Display Manager
-[![Test status](https://github.com/canonical/lightdm/actions/workflows/test.yaml/badge.svg)](https://github.com/canonical/lightdm/actions/workflows/test.yaml)
+[![Test status](https://github.com/ubuntu/lightdm/actions/workflows/test.yaml/badge.svg)](https://github.com/ubuntu/lightdm/actions/workflows/test.yaml)
 [![LightDM questions on AskUbuntu](https://img.shields.io/stackexchange/askubuntu/t/lightdm?color=brightgreen)](https://askubuntu.com/questions/tagged/lightdm)
 
 LightDM is a lightweight, cross-desktop display manager. A display manager is a daemon that:
@@ -19,7 +19,7 @@ Key features of LightDM are:
 The core LightDM project does not provide any greeter with it; you should install a greeter appropriate to your system. Popular greeter projects are:
 
  * [LightDM GTK+ Greeter](https://github.com/Xubuntu/lightdm-gtk-greeter) - a greeter that has moderate requirements (GTK+).
- * [LightDM KDE](http://projects.kde.org/lightdm) - greeter used in [KDE](http://kde.org) (Qt)
+ * [LightDM KDE Greeter](https://invent.kde.org/plasma/lightdm-kde-greeter) - greeter by [KDE](https://kde.org) (Qt)
  * [LXQt Greeter](https://github.com/lxde/lxqt-lightdm-greeter) - greeter used in [LXQt](http://lxqt.org/) (Qt)
  * [Pantheon Greeter](https://github.com/elementary/greeter) - greeter used in [elementary OS](https://elementary.io/) (GTK+/Clutter).
  * [Unity Greeter](https://launchpad.net/unity-greeter) - greeter used in [Unity](https://launchpad.net/unity).
@@ -46,7 +46,7 @@ For example, if a sysadmin wanted to override the system configured default sess
 user-session=mysession
 ```
 
-Configuration is in keyfile format. For most installations you will want to change the keys in the `[Seat:*]` section as this applies to all seats on the system (normally just one). A configuration file showing all the possible keys is provided in [`data/lightdm.conf`](https://github.com/canonical/lightdm/blob/main/data/lightdm.conf).
+Configuration is in keyfile format. For most installations you will want to change the keys in the `[Seat:*]` section as this applies to all seats on the system (normally just one). A configuration file showing all the possible keys is provided in [`data/lightdm.conf`](https://github.com/ubuntu/lightdm/blob/main/data/lightdm.conf).
 
 ### Display Setup Script
 

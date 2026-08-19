@@ -127,7 +127,7 @@ typedef struct
     gchar *id;
     gchar *path;
     gboolean can_graphical;
-    gboolean can_multi_session;
+    gboolean can_tty;
     gchar *active_session;
 } Login1Seat;
 
@@ -539,9 +539,6 @@ handle_command (const gchar *command)
         const gchar *v = g_hash_table_lookup (params, "CAN-GRAPHICAL");
         if (v)
             seat->can_graphical = strcmp (v, "TRUE") == 0;
-        v = g_hash_table_lookup (params, "CAN-MULTI-SESSION");
-        if (v)
-            seat->can_multi_session = strcmp (v, "TRUE") == 0;
     }
     else if (strcmp (name, "ADD-LOCAL-X-SEAT") == 0)
     {
@@ -572,12 +569,6 @@ handle_command (const gchar *command)
             {
                 seat->can_graphical = strcmp (v, "TRUE") == 0;
                 g_variant_builder_add (&invalidated_properties, "s", "CanGraphical");
-            }
-            v = g_hash_table_lookup (params, "CAN-MULTI-SESSION");
-            if (v)
-            {
-                seat->can_multi_session = strcmp (v, "TRUE") == 0;
-                g_variant_builder_add (&invalidated_properties, "s", "CanMultiSession");
             }
             v = g_hash_table_lookup (params, "ACTIVE-SESSION");
             if (v)
@@ -1553,8 +1544,8 @@ handle_login1_seat_get_property (GDBusConnection       *connection,
 
     if (strcmp (property_name, "CanGraphical") == 0)
         return g_variant_new_boolean (seat->can_graphical);
-    else if (strcmp (property_name, "CanMultiSession") == 0)
-        return g_variant_new_boolean (seat->can_multi_session);
+    else if (strcmp (property_name, "CanTTY") == 0)
+        return g_variant_new_boolean (seat->can_tty);
     else if (strcmp (property_name, "Id") == 0)
         return g_variant_new_string (seat->id);
     else if (strcmp (property_name, "ActiveSession") == 0)
@@ -1579,14 +1570,14 @@ add_login1_seat (GDBusConnection *connection, const gchar *id, gboolean emit_sig
     seat->id = g_strdup (id);
     seat->path = g_strdup_printf ("/org/freedesktop/login1/seat/%s", seat->id);
     seat->can_graphical = TRUE;
-    seat->can_multi_session = TRUE;
+    seat->can_tty = TRUE;
     seat->active_session = NULL;
 
     const gchar *login1_seat_interface =
         "<node>"
         "  <interface name='org.freedesktop.login1.Seat'>"
         "    <property name='CanGraphical' type='b' access='read'/>"
-        "    <property name='CanMultiSession' type='b' access='read'/>"
+        "    <property name='CanTTY' type='b' access='read'/>"
         "    <property name='ActiveSession' type='(so)' access='read'/>"
         "    <property name='Id' type='s' access='read'/>"
         "  </interface>"
@@ -1967,8 +1958,6 @@ login1_name_acquired_cb (GDBusConnection *connection,
     Login1Seat *seat0 = add_login1_seat (connection, "seat0", FALSE);
     if (g_key_file_has_key (config, "test-runner-config", "seat0-can-graphical", NULL))
         seat0->can_graphical = g_key_file_get_boolean (config, "test-runner-config", "seat0-can-graphical", NULL);
-    if (g_key_file_has_key (config, "test-runner-config", "seat0-can-multi-session", NULL))
-        seat0->can_multi_session = g_key_file_get_boolean (config, "test-runner-config", "seat0-can-multi-session", NULL);
 
     service_count--;
     if (service_count == 0)

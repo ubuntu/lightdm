@@ -1,3 +1,54 @@
+Overview of changes in lightdm 1.33.1
+
+   * Removed debian/ folder
+     - Allows for project to be more distro-neutral
+   * Assume that seats CanMultiSession by default
+     - The CanMultiSession property was removed from systemd in 2020.
+       As a result, this was assumed to be false
+     - This fixes user switching
+   * On FreeBSD there are always multiple VTs
+     - Patch required for FreeBSD
+
+Overview of changes in lightdm 1.33.0
+
+   * Honor VNCServer's command in sanity check
+   * x-server-local: Correctly order command line arguments
+   * x-server-xvnc: Adjust default color depth to match upstream
+     TigerVNC
+   * Supress log errors for missing pam modules
+   * Don't disconnect signals on cancel before the session actually ends
+   * x-server: Avoid reusing the local X server if the hostname has
+     changed
+   * Initialize WaylandSessionPrivate.vt to -1 (for non-seat0 seat)
+   * Use systemd-logind to discover active session on non-seat0 seats
+   * Improve debug logging when seat_switch_to_greater fails
+   * Try activating an existing greeter before checking for switch
+     support
+   * Consolidate Seat.setup and Seat.start for readability
+   * Move supports_multi_session initialization to init
+   * Disable user switching if logind says it isn't supported
+   * vnc-server: Attempting binding to IPv6 first.
+   * Add hostname service dep to lightdm.service
+   * Fixed the issue that tty information would not be written to utmp
+     when logging into a Wayland session.
+   * Use setusercontext if available
+   * Add support for changing the home directory in PAM modules
+   * Return and use the potentially changed home directory from the
+     session child
+   * Implement logic to get FreeBSD ttyv device names.
+   * Allow Wayland sessions to start on seat0 on kernels with no VTs
+   * Create lightdm failure and success handler services
+   * Update lightdm.service RestartSec to 5s (from 15s)
+   * fix some memory leak in session_child_run
+   * Implement FreeBSD vt switching
+   * Code optimizations:
+     - Reduce UserItem class 72 to 64 bytes using align for 64-bit
+       platforms
+     - xserver, xdmcp-protocol: fix incorrect format types
+     - move const strlen call out of loop
+   * Add client library version for Qt6
+   * Fix and update tests
+
 Overview of changes in lightdm 1.32.0
 
    * Overwrite existing X authority files to avoid corruption
