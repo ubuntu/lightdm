@@ -527,8 +527,10 @@ from_child_cb (GIOChannel *source, GIOCondition condition, gpointer data)
         read_from_child (session, &priv->authentication_result, sizeof (priv->authentication_result));
         g_free (priv->authentication_result_string);
         priv->authentication_result_string = read_string_from_child (session);
-
-        l_debug (session, "Authentication complete with return value %d: %s", priv->authentication_result, priv->authentication_result_string);
+        
+        l_debug (session, "Authentication complete with return value %d: %s",
+                 priv->authentication_result,
+                 priv->authentication_result_string ? priv->authentication_result_string : "(null)");
 
         /* No longer expect any more messages */
         priv->from_child_watch = 0;
@@ -663,7 +665,9 @@ session_real_start (Session *session)
     write_string (session, priv->xdisplay);
     write_xauth (session, priv->x_authority);
 
-    l_debug (session, "Started with service '%s', username '%s'", priv->pam_service, priv->username);
+    l_debug (session, "Started with service '%s', username '%s'",
+             priv->pam_service ? priv->pam_service : "(null)",
+             priv->username ? priv->username : "(null)");
 
     return TRUE;
 }
