@@ -24,6 +24,7 @@
 #include <libaudit.h>
 #endif
 
+#include "accounts.h"
 #include "configuration.h"
 #include "console-kit.h"
 #include "log-file.h"
@@ -31,6 +32,7 @@
 #include "privileges.h"
 #include "session-child.h"
 #include "session.h"
+#include "user-list.h"
 #include "x-authority.h"
 
 /* Child process being run */
@@ -401,7 +403,7 @@ session_child_run (int argc, char **argv)
             pam_putenv (pam_handle, user_env);
             g_autofree gchar* logname_env = g_strdup_printf ("LOGNAME=%s", username);
             pam_putenv (pam_handle, logname_env);
-            g_autofree gchar* home_env = g_strdup_printf ("HOME=%s",user_get_home_directory (user));
+            g_autofree gchar* home_env = g_strdup_printf ("HOME=%s", user_get_home_directory (user));
             pam_putenv (pam_handle, home_env);
             g_autofree gchar* shell_env = g_strdup_printf ("SHELL=%s", user_get_shell (user));
             pam_putenv (pam_handle, shell_env);
@@ -549,6 +551,44 @@ session_child_run (int argc, char **argv)
     if (!home_directory) {
         home_directory = user_get_home_directory (user);
     }
+    bool pam_changed_home = strcmp(home_directory, user_get_home_directory (user)) != 0;
+
+    const gchar *shell = pam_getenv (pam_handle, "SHELL");
+    if (!shell) {
+        shell = user_get_shell (user);
+    }
+    bool pam_changed_shell = strcmp(shell, user_get_shell (user)) != 0;
+
+    /*
+     * Update the HOME and SHELL environment variables from accounts service if
+     * either of them has not already been changed by PAM
+     */
+    if (!pam_changed_home || !pam_changed_shell) {
+        common_user_list_cleanup();
+
+        user = accounts_get_user_by_name (username);
+        if (!user)
+        {
+            g_printerr ("Failed to update information on user %s: %s\n", username, strerror (errno));
+            pam_end (pam_handle, 0);
+            return EXIT_FAILURE;
+        }
+
+        /* Update HOME if it's unchanged */
+        if (!pam_changed_home) {
+            home_directory = user_get_home_directory (user);
+            g_autofree gchar* home_env = g_strdup_printf ("HOME=%s", home_directory);
+            pam_putenv (pam_handle, home_env);
+        }
+
+        /* Update SHELL if it's unchanged */
+        if (!pam_changed_shell) {
+            shell = user_get_shell (user);
+            g_autofree gchar* shell_env = g_strdup_printf ("SHELL=%s", shell);
+            pam_putenv (pam_handle, shell_env);
+        }
+    }
+
     if (version >= 4)
         write_string (home_directory);
 
