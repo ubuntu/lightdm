@@ -25,14 +25,13 @@
 #endif
 
 #include "configuration.h"
+#include "console-kit.h"
+#include "log-file.h"
+#include "login1.h"
+#include "privileges.h"
 #include "session-child.h"
 #include "session.h"
-#include "console-kit.h"
-#include "login1.h"
-#include "log-file.h"
-#include "privileges.h"
 #include "x-authority.h"
-#include "configuration.h"
 
 /* Child process being run */
 static GPid child_pid = 0;
