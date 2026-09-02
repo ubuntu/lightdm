@@ -127,7 +127,7 @@ vt_set_active (gint number)
         /* This call sometimes get interrupted (not sure what signal is causing it), so retry if that is the case */
         while (TRUE)
         {
-            if (ioctl (tty_fd, VT_WAITACTIVE, n) < 0) 
+            if (ioctl (tty_fd, VT_WAITACTIVE, n) < 0)
             {
                 if (errno == EINTR)
                     continue;
@@ -177,16 +177,78 @@ vt_get_unused (void)
     return number;
 }
 
+/*
+ * Keep a file descriptor open on a VT for as long as we have it reserved.
+ * logind decides whether to start an autovt getty on a VT by asking the kernel
+ * whether anything currently has it open, and we activate a VT before the
+ * display server running on it has opened it. Without this, logind wins that
+ * race and the getty shares the VT with us, resetting the keyboard out of
+ * K_OFF so that Alt+Left and Alt+Right switch VT from inside the session.
+ */
+#if defined(__linux__)
+
+/* VT number -> open file descriptor, for the VTs we currently have reserved. */
+static GHashTable *vt_fds = NULL;
+
+static void
+vt_fd_open (gint number)
+{
+    if (getuid () != 0)
+        return;
+
+    if (!vt_fds)
+        vt_fds = g_hash_table_new (g_direct_hash, g_direct_equal);
+
+    if (g_hash_table_contains (vt_fds, GINT_TO_POINTER (number)))
+        return;
+
+    g_autofree gchar *name = g_strdup_printf ("/dev/tty%d", number);
+    gint fd = g_open (name, O_RDWR | O_NOCTTY | O_CLOEXEC, 0);
+    if (fd < 0)
+    {
+        g_warning ("Error opening %s: %s", name, strerror (errno));
+        return;
+    }
+
+    g_hash_table_insert (vt_fds, GINT_TO_POINTER (number), GINT_TO_POINTER (fd));
+}
+
+static void
+vt_fd_close (gint number)
+{
+    if (!vt_fds)
+        return;
+
+    gpointer fd;
+    if (!g_hash_table_lookup_extended (vt_fds, GINT_TO_POINTER (number), NULL, &fd))
+        return;
+
+    close (GPOINTER_TO_INT (fd));
+    g_hash_table_remove (vt_fds, GINT_TO_POINTER (number));
+}
+
+#else
+
+static void vt_fd_open (gint number) { }
+static void vt_fd_close (gint number) { }
+
+#endif
+
 void
 vt_ref (gint number)
 {
     g_debug ("Using VT %d", number);
     used_vts = g_list_append (used_vts, GINT_TO_POINTER (number));
+    vt_fd_open (number);
 }
 
 void
 vt_unref (gint number)
 {
-    g_debug ("Releasing VT %d", number);
     used_vts = g_list_remove (used_vts, GINT_TO_POINTER (number));
+    if (vt_is_used (number))
+        return;
+
+    g_debug ("Releasing VT %d", number);
+    vt_fd_close (number);
 }
