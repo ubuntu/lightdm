@@ -643,7 +643,8 @@ start_session (Seat *seat, Session *session)
     if (IS_GREETER_SESSION (session))
     {
         g_autofree gchar *log_dir = config_get_string (config_get_instance (), "LightDM", "log-directory");
-        g_autofree gchar *filename = g_strdup_printf ("%s-greeter.log", seat_get_name (seat));
+        const gchar *name = seat_get_name (seat);
+        g_autofree gchar *filename = g_strdup_printf ("%s-greeter.log", name ? name : "unknown");
         g_autofree gchar *log_filename = g_build_filename (log_dir, filename, NULL);
         gboolean backup_logs = config_get_boolean (config_get_instance (), "LightDM", "backup-logs");
         session_set_log_file (session, log_filename, backup_logs ? LOG_MODE_BACKUP_AND_TRUNCATE : LOG_MODE_APPEND);
@@ -1036,7 +1037,7 @@ create_user_session (Seat *seat, const gchar *username, gboolean autostart)
     g_autoptr(SessionConfig) session_config = find_session_config (seat, sessions_dir, session_name);
     if (!session_config)
     {
-        l_debug (seat, "Can't find session '%s'", session_name);
+        l_debug (seat, "Can't find session '%s'", session_name ? session_name : "(null)");
         return NULL;
     }
 
@@ -1076,7 +1077,7 @@ create_guest_session (Seat *seat, const gchar *session_name)
     g_autoptr(SessionConfig) session_config = find_session_config (seat, sessions_dir, session_name);
     if (!session_config)
     {
-        l_debug (seat, "Can't find session '%s'", session_name);
+        l_debug (seat, "Can't find session '%s'", session_name ? session_name : "(null)");
         return NULL;
     }
 
@@ -1183,7 +1184,7 @@ greeter_start_session_cb (Greeter *greeter, SessionType type, const gchar *sessi
         g_autoptr(SessionConfig) session_config = find_session_config (seat, sessions_dir, session_name);
         if (!session_config)
         {
-            l_debug (seat, "Can't find session '%s'", session_name);
+            l_debug (seat, "Can't find session '%s'", session_name ? session_name : "(null)");
             return FALSE;
         }
 
@@ -2005,7 +2006,8 @@ seat_class_init (SeatClass *klass)
 static gint
 seat_real_logprefix (Logger *self, gchar *buf, gulong buflen)
 {
-    return g_snprintf (buf, buflen, "Seat %s: ", seat_get_name (SEAT (self)));
+    const gchar *name = seat_get_name (SEAT (self));
+    return g_snprintf (buf, buflen, "Seat %s: ", name ? name : "(null)");
 }
 
 static void
