@@ -19,3 +19,10 @@ DISTCLEANFILES = po/.intltool-merge-cache.lock
 
 lightdm-${VERSION}.tar.xz.asc: lightdm-${VERSION}.tar.xz
 	gpg --armor --detach-sig --sign $<
+
+bench:
+	$(MAKE) -C benchmarks run
+
+bench-quick:
+	$(MAKE) -C benchmarks quick
+
