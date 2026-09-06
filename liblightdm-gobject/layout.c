@@ -9,7 +9,11 @@
  * See http://www.gnu.org/copyleft/lgpl.html the full text of the license.
  */
 
-#include <libxklavier/xklavier.h>
+#include <X11/Xlib.h>
+#include <xcb/xcb.h>
+#include <xkbcommon/xkbcommon.h>
+#include <xkbcommon/xkbcommon-x11.h>
+#include <xkbcommon/xkbregistry.h>
 
 #include "lightdm/layout.h"
 
@@ -37,7 +41,8 @@
 enum {
     PROP_NAME = 1,
     PROP_SHORT_DESCRIPTION,
-    PROP_DESCRIPTION
+    PROP_DESCRIPTION,
+    PROP_VARIANT
 };
 
 typedef struct
@@ -45,65 +50,26 @@ typedef struct
     gchar *name;
     gchar *short_description;
     gchar *description;
+    gchar *variant;
 } LightDMLayoutPrivate;
 
 G_DEFINE_TYPE_WITH_PRIVATE (LightDMLayout, lightdm_layout, G_TYPE_OBJECT)
 
 static gboolean have_layouts = FALSE;
 static Display *display = NULL;
-static XklEngine *xkl_engine = NULL;
-static XklConfigRec *xkl_config = NULL;
+static struct rxkb_context *rxkb_context = NULL;
+static struct xkb_keymap* xkb_keymap = NULL;
+static struct xkb_context* xkb_context = NULL;
+static struct rxkb_layout* rxkb_layout = NULL;
+static struct xkb_state* xkb_state = NULL;
 static GList *layouts = NULL;
 static LightDMLayout *default_layout = NULL;
 
-static gchar *
-make_layout_string (const gchar *layout, const gchar *variant)
-{
-    if (!layout || layout[0] == 0)
-        return NULL;
-    else if (!variant || variant[0] == 0)
-        return g_strdup (layout);
-    else
-        return g_strdup_printf ("%s\t%s", layout, variant);
-}
-
 static void
-parse_layout_string (const gchar *name, gchar **layout, gchar **variant)
+create_layout (struct rxkb_layout *item)
 {
-    *layout = NULL;
-    *variant = NULL;
-
-    if (!name)
-        return;
-
-    g_auto(GStrv) split = g_strsplit (name, "\t", 2);
-    if (split[0])
-    {
-        *layout = g_strdup (split[0]);
-        if (split[1])
-            *variant = g_strdup (split[1]);
-    }
-}
-
-static void
-variant_cb (XklConfigRegistry *config,
-           const XklConfigItem *item,
-           gpointer data)
-{
-    g_autofree gchar *full_name = make_layout_string (data, item->name);
-    LightDMLayout *layout = g_object_new (LIGHTDM_TYPE_LAYOUT, "name", full_name, "short-description", item->short_description, "description", item->description, NULL);
+    LightDMLayout *layout = g_object_new (LIGHTDM_TYPE_LAYOUT, "name", rxkb_layout_get_name(item), "short-description", rxkb_layout_get_brief(item), "description", rxkb_layout_get_description(item), "variant", rxkb_layout_get_variant(item), NULL);
     layouts = g_list_append (layouts, layout);
-}
-
-static void
-layout_cb (XklConfigRegistry *config,
-           const XklConfigItem *item,
-           gpointer data)
-{
-    LightDMLayout *layout = g_object_new (LIGHTDM_TYPE_LAYOUT, "name", item->name, "short-description", item->short_description, "description", item->description, NULL);
-    layouts = g_list_append (layouts, layout);
-
-    xkl_config_registry_foreach_layout_variant (config, item->name, variant_cb, (gpointer) item->name);
 }
 
 /**
@@ -123,15 +89,41 @@ lightdm_get_layouts (void)
     if (display == NULL)
         return NULL;
 
-    xkl_engine = xkl_engine_get_instance (display);
-    xkl_config = xkl_config_rec_new ();
-    if (!xkl_config_rec_get_from_server (xkl_config, xkl_engine))
-        g_warning ("Failed to get Xkl configuration from server");
+    xcb_connection_t* xcb_connection = xcb_connect (NULL, NULL);
+    int err = xcb_connection_has_error(xcb_connection);
+    if (err)
+        return NULL;
 
-    XklConfigRegistry *registry = xkl_config_registry_get_instance (xkl_engine);
-    xkl_config_registry_load (registry, FALSE);
-    xkl_config_registry_foreach_layout (registry, layout_cb, NULL);
-    g_object_unref (registry);
+    xkb_context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
+    if(!xkb_context)
+        return NULL;
+
+    err = xkb_x11_setup_xkb_extension(xcb_connection, XKB_X11_MIN_MAJOR_XKB_VERSION, XKB_X11_MIN_MINOR_XKB_VERSION, XKB_X11_SETUP_XKB_EXTENSION_NO_FLAGS, NULL, NULL, NULL, NULL);
+    if(err == 0)  // returns 1 on success
+        return NULL;
+
+    int32_t device_id = xkb_x11_get_core_keyboard_device_id(xcb_connection);
+    if(device_id < 0)
+        return NULL;
+
+    xkb_keymap = xkb_x11_keymap_new_from_device(xkb_context, xcb_connection, device_id, XKB_KEYMAP_COMPILE_NO_FLAGS);
+    if(!xkb_keymap)
+        return NULL;
+
+    xkb_state = xkb_x11_state_new_from_device(xkb_keymap, xcb_connection, device_id);
+    if(!xkb_state)
+        return NULL;
+
+    rxkb_context = rxkb_context_new (RXKB_CONTEXT_NO_FLAGS);
+    if (!rxkb_context_parse_default_ruleset(rxkb_context))
+        return NULL;
+
+    rxkb_layout = rxkb_layout_first(rxkb_context);
+    while(rxkb_layout != NULL)
+    {
+        create_layout(rxkb_layout);
+        rxkb_layout = rxkb_layout_next(rxkb_layout);
+    }
 
     have_layouts = TRUE;
 
@@ -152,20 +144,19 @@ lightdm_set_layout (LightDMLayout *dmlayout)
 
     g_debug ("Setting keyboard layout to '%s'", lightdm_layout_get_name (dmlayout));
 
-    g_autofree gchar *layout = NULL;
-    g_autofree gchar *variant = NULL;
-    parse_layout_string (lightdm_layout_get_name (dmlayout), &layout, &variant);
+    g_autofree gchar *layout = g_strdup(lightdm_layout_get_name (dmlayout));
+    g_autofree gchar *variant = g_strdup(lightdm_layout_get_variant (dmlayout));
 
-    if (layouts && xkl_config)
+    if (layouts && xkb_keymap)
     {
-        xkl_config->layouts[0] = g_steal_pointer(&layout);
-        xkl_config->layouts[1] = NULL;
-        xkl_config->variants[0] = g_steal_pointer(&variant);
-        xkl_config->variants[1] = NULL;
         default_layout = dmlayout;
     }
-    if (!xkl_config_rec_activate (xkl_config, xkl_engine))
-        g_warning ("Failed to activate XKL config");
+
+    // We used to use libxklavier, which called xmodmap - we can use setxkbmap.
+    char cmd[1024];
+    g_snprintf(cmd, sizeof(cmd), "setxkbmap %s %s", layout, variant ? variant : "");
+    if (system(cmd) != 0)
+        g_warning("Error executing setxkbmap command.");
 }
 
 /**
@@ -180,15 +171,16 @@ lightdm_get_layout (void)
 {
     lightdm_get_layouts ();
 
-    if (layouts && xkl_config && !default_layout)
+    if (layouts && xkb_keymap && !default_layout)
     {
-        g_autofree gchar *full_name = make_layout_string (xkl_config->layouts ? xkl_config->layouts[0] : NULL,
-                                                          xkl_config->variants ? xkl_config->variants[0] : NULL);
+        xkb_layout_index_t idx = xkb_state_serialize_layout(xkb_state, XKB_STATE_LAYOUT_EFFECTIVE);
+        g_autofree gchar *full_name = g_strdup(xkb_keymap_layout_get_name(xkb_keymap, idx));
 
         for (GList *item = layouts; item; item = item->next)
         {
+            // xkb_keymap_layout_get_name returns the 'description' of the registry
             LightDMLayout *iter_layout = (LightDMLayout *) item->data;
-            if (g_strcmp0 (lightdm_layout_get_name (iter_layout), full_name) == 0)
+            if (g_strcmp0 (lightdm_layout_get_description (iter_layout), full_name) == 0)
             {
                 default_layout = iter_layout;
                 break;
@@ -250,6 +242,23 @@ lightdm_layout_get_description (LightDMLayout *layout)
     return priv->description;
 }
 
+/**
+ * lightdm_layout_get_variant:
+ * @layout: A #LightDMLayout
+ *
+ * Get the variant of a layout.
+ *
+ * Return value: The variant string of the layout
+ **/
+const gchar *
+lightdm_layout_get_variant (LightDMLayout *layout)
+{
+    g_return_val_if_fail (LIGHTDM_IS_LAYOUT (layout), NULL);
+
+    LightDMLayoutPrivate *priv = lightdm_layout_get_instance_private (layout);
+    return priv->variant;
+}
+
 static void
 lightdm_layout_init (LightDMLayout *layout)
 {
@@ -277,6 +286,10 @@ lightdm_layout_set_property (GObject      *object,
         g_free (priv->description);
         priv->description = g_strdup (g_value_get_string (value));
         break;
+    case PROP_VARIANT:
+        g_free (priv->variant);
+        priv->variant = g_strdup (g_value_get_string (value));
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
@@ -301,6 +314,9 @@ lightdm_layout_get_property (GObject    *object,
     case PROP_DESCRIPTION:
         g_value_set_string (value, lightdm_layout_get_description (self));
         break;
+    case PROP_VARIANT:
+        g_value_set_string (value, lightdm_layout_get_variant (self));
+        break;
     default:
         G_OBJECT_WARN_INVALID_PROPERTY_ID (object, prop_id, pspec);
         break;
@@ -316,6 +332,7 @@ lightdm_layout_finalize (GObject *object)
     g_free (priv->name);
     g_free (priv->short_description);
     g_free (priv->description);
+    g_free (priv->variant);
 }
 
 static void
@@ -346,6 +363,14 @@ lightdm_layout_class_init (LightDMLayoutClass *klass)
                                      g_param_spec_string ("description",
                                                           "description",
                                                           "Long description of the layout",
+                                                          NULL,
+                                                          G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
+
+    g_object_class_install_property (object_class,
+                                     PROP_VARIANT,
+                                     g_param_spec_string ("variant",
+                                                          "variant",
+                                                          "Variant of the layout",
                                                           NULL,
                                                           G_PARAM_READWRITE | G_PARAM_CONSTRUCT_ONLY));
 }
