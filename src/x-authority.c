@@ -261,7 +261,7 @@ x_authority_write (XAuthority *auth, XAuthWriteMode mode, const gchar *filename,
             g_warning ("Error reading existing Xauthority: %s", read_error->message);
     }
     GList *records = NULL;
-    gboolean matched = FALSE;
+    gboolean matching_record_found = FALSE;
     while (input_offset != input_length)
     {
         g_autoptr(XAuthority) a = g_object_new (X_AUTHORITY_TYPE, NULL);
@@ -290,24 +290,28 @@ x_authority_write (XAuthority *auth, XAuthWriteMode mode, const gchar *filename,
             address_matches = i == priv->address_length;
         }
 
-        /* If this record matches, then update or delete it */
-        if (!matched &&
-            priv->family == a_priv->family &&
-            address_matches &&
-            strcmp (priv->number, a_priv->number) == 0)
+        gboolean record_matches = priv->family == a_priv->family &&
+                                  address_matches &&
+                                  strcmp (priv->number, a_priv->number) == 0 &&
+                                  strcmp (priv->authorization_name, a_priv->authorization_name) == 0;
+
+        /* Remove all matching records, or update and keep only the first one */
+        if (record_matches)
         {
-            matched = TRUE;
-            if (mode == XAUTH_WRITE_MODE_REMOVE)
+            gboolean duplicate_record = matching_record_found;
+            matching_record_found = TRUE;
+
+            if (mode == XAUTH_WRITE_MODE_REMOVE || duplicate_record)
                 continue;
-            else
-                x_authority_set_authorization_data (a, priv->authorization_data, priv->authorization_data_length);
+
+            x_authority_set_authorization_data (a, priv->authorization_data, priv->authorization_data_length);
         }
 
         records = g_list_append (records, g_steal_pointer (&a));
     }
 
-    /* If didn't exist, then add a new one */
-    if (!matched)
+    /* If setting or replacing a missing record, then add a new one */
+    if (mode != XAUTH_WRITE_MODE_REMOVE && !matching_record_found)
         records = g_list_append (records, g_object_ref (auth));
 
     /* Write records back */
