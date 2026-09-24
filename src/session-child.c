@@ -479,6 +479,9 @@ session_child_run (int argc, char **argv)
         g_clear_object (&x_authority);
         x_authority = read_xauth ();
     }
+    /* The session can run on a different VT than the greeter used during authentication */
+    if (!xdisplay && tty)
+        pam_set_item (pam_handle, PAM_TTY, tty);
     gsize env_length;
     read_data (&env_length, sizeof (env_length));
     for (int i = 0; i < env_length; i++)
