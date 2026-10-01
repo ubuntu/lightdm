@@ -6,96 +6,97 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: lightdm\n"
-"Report-Msgid-Bugs-To: FULL NAME <EMAIL@ADDRESS>\n"
-"POT-Creation-Date: 2010-12-06 11:05+0000\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2026-08-12 09:39-0400\n"
 "PO-Revision-Date: 2011-10-03 23:00+0000\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: Kurdish <ku@li.org>\n"
+"Language: ku\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Launchpad-Export-Date: 2013-08-09 05:11+0000\n"
 "X-Generator: Launchpad (build 16723)\n"
 
-#: ../greeters/gtk/lightdm-gtk-greeter.c:409
-msgid "Are you sure you want to close all programs and restart the computer?"
-msgstr ""
-"Bi rastî dixwazî hemû bernameyan bigirî û komputerê dîsa bidî destpêkirin?"
-
-#: ../greeters/gtk/greeter.ui.h:1
-msgid "Cancel"
-msgstr "Betal"
-
-#: ../greeters/gtk/lightdm-gtk-greeter.c:410
-msgid "Restart"
-msgstr "Dîsdestpêkirin"
-
-#: ../greeters/gtk/lightdm-gtk-greeter.c:434
-msgid ""
-"Are you sure you want to close all programs and shutdown the computer?"
-msgstr "Bi rastî dixwazî hemû bernameyan û komputerê bigirî?"
-
-#: ../greeters/gtk/lightdm-gtk-greeter.c:435
-msgid "Shutdown"
-msgstr "Girtin"
-
-#: ../greeters/gtk/greeter.ui.h:4
-msgid "Large Font"
-msgstr "Curenivîsê mezin"
-
-#: ../greeters/ldm-gtk-greeter.c:611
-msgid "High Constrast"
+#: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:1
+msgid "Set properties of own user"
 msgstr ""
 
-#: ../greeters/ldm-gtk-greeter.c:615
-msgid "Options"
+#: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:2
+msgid "Authentication is required to set one's own greeter properties."
 msgstr ""
 
-#: ../greeters/ldm-gtk-greeter.c:620
-msgid "Language"
+#: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:3
+msgid "Set properties of any user"
 msgstr ""
 
-#: ../greeters/ldm-gtk-greeter.c:646
-msgid "Keyboard Layout"
+#: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:4
+msgid "Authentication is required to get another user's greeter properties."
 msgstr ""
 
-#: ../greeters/ldm-gtk-greeter.c:668
-msgid "Session"
+#: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:5
+msgid "Authentication is required to set another user's greeter properties."
 msgstr ""
 
-#: ../greeters/gtk/greeter.ui.h:8
-msgid "Suspend"
-msgstr "Xew"
+#. Arguments and description for --help test
+#: ../src/lightdm.c:585
+msgid "- Display Manager"
+msgstr ""
 
-#: ../greeters/gtk/greeter.ui.h:2
-msgid "Hibernate"
-msgstr "Xewa kûr"
+#. Help string for command line --config flag
+#: ../src/lightdm.c:596
+msgid "Use configuration file"
+msgstr ""
 
-#: ../greeters/gtk/greeter.ui.h:6
-msgid "Restart..."
-msgstr "Dîsdestpêkirin..."
+#. Help string for command line --debug flag
+#: ../src/lightdm.c:599
+msgid "Print debugging messages"
+msgstr ""
 
-#: ../greeters/gtk/greeter.ui.h:7
-msgid "Shutdown..."
-msgstr "Girtin..."
+#. Help string for command line --test-mode flag
+#: ../src/lightdm.c:602
+msgid "Run as unprivileged user, skipping things that require root access"
+msgstr ""
 
-#. Description on how to use Light Display Manager displayed on command-line
-#: ../src/lightdm.c:100
+#. Help string for command line --pid-file flag
+#: ../src/lightdm.c:605
+msgid "File to write PID into"
+msgstr ""
+
+#. Help string for command line --log-dir flag
+#: ../src/lightdm.c:608
+msgid "Directory to write logs to"
+msgstr ""
+
+#. Help string for command line --run-dir flag
+#: ../src/lightdm.c:611
+msgid "Directory to store running state"
+msgstr ""
+
+#. Help string for command line --cache-dir flag
+#: ../src/lightdm.c:614
+msgid "Directory to cache information"
+msgstr ""
+
+#. Help string for command line --show-config flag
+#: ../src/lightdm.c:617
+msgid "Show combined configuration"
+msgstr ""
+
+#. Help string for command line --version flag
+#: ../src/lightdm.c:620
+msgid "Show release version"
+msgstr ""
+
+#. Text printed out when an unknown command-line argument provided
+#: ../src/lightdm.c:631
+#, c-format
+msgid "Run '%s --help' to see a full list of available command line options."
+msgstr ""
+
+#. Text printed out when an unknown command-line argument provided
+#: ../src/dm-tool.c:29
 #, c-format
 msgid ""
-"Usage:\n"
-"  %s - Display Manager"
-msgstr ""
-
-#. Description on how to use Light Display Manager displayed on command-line
-#: ../src/lightdm.c:106
-#, c-format
-msgid ""
-"Help Options:\n"
-"  -c, --config <file>             Use configuration file\n"
-"      --pid-file <file>           File to write PID into\n"
-"  -d, --debug                     Print debugging messages\n"
-"      --test-mode                 Run as unprivileged user\n"
-"  -v, --version                   Show release version\n"
-"  -h, --help                      Show help options"
+"Run 'dm-tool --help' to see a full list of available command line options."
 msgstr ""

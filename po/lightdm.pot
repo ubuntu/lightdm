@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2022-07-18 15:24+1200\n"
+"POT-Creation-Date: 2026-08-12 09:42-0400\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -38,57 +38,57 @@ msgid "Authentication is required to set another user's greeter properties."
 msgstr ""
 
 #. Arguments and description for --help test
-#: ../src/lightdm.c:568
+#: ../src/lightdm.c:585
 msgid "- Display Manager"
 msgstr ""
 
 #. Help string for command line --config flag
-#: ../src/lightdm.c:579
+#: ../src/lightdm.c:596
 msgid "Use configuration file"
 msgstr ""
 
 #. Help string for command line --debug flag
-#: ../src/lightdm.c:582
+#: ../src/lightdm.c:599
 msgid "Print debugging messages"
 msgstr ""
 
 #. Help string for command line --test-mode flag
-#: ../src/lightdm.c:585
+#: ../src/lightdm.c:602
 msgid "Run as unprivileged user, skipping things that require root access"
 msgstr ""
 
 #. Help string for command line --pid-file flag
-#: ../src/lightdm.c:588
+#: ../src/lightdm.c:605
 msgid "File to write PID into"
 msgstr ""
 
 #. Help string for command line --log-dir flag
-#: ../src/lightdm.c:591
+#: ../src/lightdm.c:608
 msgid "Directory to write logs to"
 msgstr ""
 
 #. Help string for command line --run-dir flag
-#: ../src/lightdm.c:594
+#: ../src/lightdm.c:611
 msgid "Directory to store running state"
 msgstr ""
 
 #. Help string for command line --cache-dir flag
-#: ../src/lightdm.c:597
+#: ../src/lightdm.c:614
 msgid "Directory to cache information"
 msgstr ""
 
 #. Help string for command line --show-config flag
-#: ../src/lightdm.c:600
+#: ../src/lightdm.c:617
 msgid "Show combined configuration"
 msgstr ""
 
 #. Help string for command line --version flag
-#: ../src/lightdm.c:603
+#: ../src/lightdm.c:620
 msgid "Show release version"
 msgstr ""
 
 #. Text printed out when an unknown command-line argument provided
-#: ../src/lightdm.c:614
+#: ../src/lightdm.c:631
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
