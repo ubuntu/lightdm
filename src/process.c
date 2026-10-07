@@ -430,6 +430,26 @@ handle_signal (GIOChannel *source, GIOCondition condition, gpointer data)
     g_debug ("Got signal %d from process %d", signo, pid);
 
     Process *process = g_hash_table_lookup (processes, GINT_TO_POINTER (pid));
+    /* Some platforms (e.g. GNU/Hurd) don't report the sender of a given signal, defaulting to reporting PID -1.
+    *  This causes the X server's ready signal to be ignored, causing us to simpy stall forever.
+    *  The following passes it to all child processes instead, so that we can still route the signal properly 
+    *  without knowing the PID of the sender */
+    if (process == NULL && pid < 0 && signo == SIGUSR1)
+    {
+        GList *list = g_hash_table_get_values (processes);
+
+        /* ref the procs since they could be modified during loop */
+        for (GList *link = list; link; link = link->next)
+            g_object_ref (link->data);
+        for (GList *link = list; link; link = link->next)
+        {
+            Process *child = link->data;
+            g_signal_emit (child, signals[GOT_SIGNAL], 0, signo);
+        }
+        g_list_free_full (list, g_object_unref);
+        
+        return TRUE;
+    }
     if (process == NULL)
         process = process_get_current ();
     if (process)
