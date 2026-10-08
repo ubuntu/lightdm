@@ -434,6 +434,7 @@ handle_signal (GIOChannel *source, GIOCondition condition, gpointer data)
     *  This causes the X server's ready signal to be ignored, causing us to simpy stall forever.
     *  The following passes it to all child processes instead, so that we can still route the signal properly 
     *  without knowing the PID of the sender */
+    #ifdef __gnu__
     if (process == NULL && pid < 0 && signo == SIGUSR1)
     {
         GList *list = g_hash_table_get_values (processes);
@@ -450,6 +451,7 @@ handle_signal (GIOChannel *source, GIOCondition condition, gpointer data)
         
         return TRUE;
     }
+    #endif
     if (process == NULL)
         process = process_get_current ();
     if (process)
