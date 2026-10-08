@@ -431,7 +431,7 @@ handle_signal (GIOChannel *source, GIOCondition condition, gpointer data)
 
     Process *process = g_hash_table_lookup (processes, GINT_TO_POINTER (pid));
     /* Some platforms (e.g. GNU/Hurd) don't report the sender of a given signal, defaulting to reporting PID -1.
-    *  This causes the X server's ready signal to be ignored, causing us to simpy stall forever.
+    *  This causes the X server's ready signal to be ignored, causing us to simply stall forever.
     *  The following passes it to all child processes instead, so that we can still route the signal properly 
     *  without knowing the PID of the sender */
     #ifdef __gnu__
