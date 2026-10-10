@@ -43,6 +43,8 @@ typedef struct
 
 G_DEFINE_TYPE_WITH_PRIVATE (GreeterSocket, greeter_socket, G_TYPE_OBJECT)
 
+static void greeter_disconnected_cb (Greeter *greeter, GreeterSocket *socket);
+
 GreeterSocket *
 greeter_socket_new (const gchar *path)
 {
@@ -55,15 +57,44 @@ greeter_socket_new (const gchar *path)
 }
 
 static void
+clear_greeter (GreeterSocket *socket)
+{
+    GreeterSocketPrivate *priv = greeter_socket_get_instance_private (socket);
+
+    if (priv->greeter)
+    {
+        g_signal_handlers_disconnect_matched (priv->greeter,
+                                              G_SIGNAL_MATCH_FUNC | G_SIGNAL_MATCH_DATA,
+                                              0, 0, NULL,
+                                              G_CALLBACK (greeter_disconnected_cb),
+                                              socket);
+        g_clear_object (&priv->greeter);
+    }
+    g_clear_object (&priv->greeter_socket);
+}
+
+static void
 greeter_disconnected_cb (Greeter *greeter, GreeterSocket *socket)
 {
     GreeterSocketPrivate *priv = greeter_socket_get_instance_private (socket);
 
     if (greeter == priv->greeter)
-    {
-        g_clear_object (&priv->greeter);
-        g_clear_object (&priv->greeter_socket);
-    }
+        clear_greeter (socket);
+}
+
+static gboolean
+greeter_connection_is_stale (GSocket *greeter_socket)
+{
+    GIOCondition condition;
+
+    if (!greeter_socket)
+        return TRUE;
+
+    /* Peer close is delivered asynchronously via the Greeter HUP watch. A
+     * reconnect can race that callback; treat HUP/ERR as a dead connection so
+     * the new client is not rejected with "Connection reset by peer". */
+    condition = g_socket_condition_check (greeter_socket, G_IO_IN | G_IO_HUP | G_IO_ERR);
+    return (condition & (G_IO_HUP | G_IO_ERR)) != 0;
 }
 
 static gboolean
@@ -78,11 +109,18 @@ greeter_connect_cb (GSocket *s, GIOCondition condition, GreeterSocket *socket)
     if (!new_socket)
         return G_SOURCE_CONTINUE;
 
-    /* Greeter already connected */
+    /* Only one active greeter; allow replace when the previous peer is gone. */
     if (priv->greeter)
     {
-        g_socket_close (new_socket, NULL);
-        return G_SOURCE_CONTINUE;
+        if (!greeter_connection_is_stale (priv->greeter_socket))
+        {
+            g_debug ("Rejecting greeter connection; greeter already connected");
+            g_socket_close (new_socket, NULL);
+            return G_SOURCE_CONTINUE;
+        }
+
+        g_debug ("Replacing stale greeter connection");
+        clear_greeter (socket);
     }
 
     priv->greeter_socket = g_steal_pointer (&new_socket);
