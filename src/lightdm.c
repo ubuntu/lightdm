@@ -558,6 +558,18 @@ login1_service_seat_attention_key_cb (Login1Service *service, Login1Seat *login1
    seat_switch_to_greeter (seat);
 }
 
+static void
+login1_service_prepare_for_sleep_cb (Login1Service *service, gboolean active)
+{
+    /* active=TRUE means the system is about to sleep; FALSE means it resumed. */
+    if (active)
+        return;
+
+    g_debug ("System resumed from sleep, re-running display setup scripts");
+    for (GList *link = display_manager_get_seats (display_manager); link; link = link->next)
+        seat_run_display_setup_scripts (link->data);
+}
+
 int
 main (int argc, char **argv)
 {
@@ -893,6 +905,10 @@ main (int argc, char **argv)
     {
         /* Load dynamic seats from logind */
         g_debug ("Monitoring logind for seats");
+
+        /* Resume is system-wide; re-run display-setup even when seats are not
+         * started from logind's default seat list. */
+        g_signal_connect (login1_service_get_instance (), LOGIN1_SERVICE_SIGNAL_PREPARE_FOR_SLEEP, G_CALLBACK (login1_service_prepare_for_sleep_cb), NULL);
 
         if (config_get_boolean (config_get_instance (), "LightDM", "start-default-seat"))
         {
