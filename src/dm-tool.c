@@ -73,9 +73,11 @@ get_seat_proxy (void)
     if (seat_proxy)
         return seat_proxy;
 
-    if (!g_getenv ("XDG_SEAT_PATH"))
+    const gchar *seat_path = g_getenv ("XDG_SEAT_PATH");
+    if (!seat_path || seat_path[0] == '\0')
     {
-        g_printerr ("Not running inside a display manager, XDG_SEAT_PATH not defined\n");
+        g_printerr ("Not running inside a display manager seat; set XDG_SEAT_PATH "
+                    "(e.g. /org/freedesktop/DisplayManager/Seat0)\n");
         exit (EXIT_FAILURE);
     }
 
@@ -84,13 +86,14 @@ get_seat_proxy (void)
                                                 G_DBUS_PROXY_FLAGS_NONE,
                                                 NULL,
                                                 "org.freedesktop.DisplayManager",
-                                                g_getenv ("XDG_SEAT_PATH"),
+                                                seat_path,
                                                 "org.freedesktop.DisplayManager.Seat",
                                                 NULL,
                                                 &error);
     if (!seat_proxy)
     {
-        g_printerr ("Unable to contact display manager: %s\n", error->message);
+        g_printerr ("Unable to contact display manager at XDG_SEAT_PATH=%s: %s\n",
+                    seat_path, error->message);
         exit (EXIT_FAILURE);
     }
 
