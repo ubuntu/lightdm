@@ -164,11 +164,14 @@ pam_conv_cb (int msg_length, const struct pam_message **msg, struct pam_response
 static void
 signal_cb (int signum)
 {
-    /* Pass on signal to child, otherwise just quit */
+    /* Pass on signal to child, otherwise just quit.
+     * Use _exit: exit() is not async-signal-safe and can deadlock in malloc
+     * if SIGTERM arrives while the main thread holds the arena lock (#484).
+     */
     if (child_pid > 0)
         kill (child_pid, signum);
     else
-        exit (EXIT_SUCCESS);
+        _exit (EXIT_SUCCESS);
 }
 
 static XAuthority *
