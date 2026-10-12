@@ -208,7 +208,7 @@ service_add_xlocal_seat_cb (DisplayManagerService *service, gint display_number)
     if (!seat)
         return NULL;
 
-    set_seat_properties (seat, NULL);
+    set_seat_properties (seat, seat_get_name (seat));
     g_autofree gchar *display_number_string = g_strdup_printf ("%d", display_number);
     seat_set_property (seat, "xserver-display-number", display_number_string);
 
@@ -273,7 +273,8 @@ xdmcp_session_cb (XDMCPServer *server, XDMCPSession *session)
     xdmcp_client_count++;
 
     seat_set_name (SEAT (seat), name);
-    set_seat_properties (SEAT (seat), NULL);
+    /* Match Seat:xdmcp* (and similar) — must pass the seat name, not NULL (#474). */
+    set_seat_properties (SEAT (seat), name);
     return display_manager_add_seat (display_manager, SEAT (seat));
 }
 
@@ -286,7 +287,7 @@ vnc_connection_cb (VNCServer *server, GSocket *connection)
     vnc_client_count++;
 
     seat_set_name (SEAT (seat), name);
-    set_seat_properties (SEAT (seat), NULL);
+    set_seat_properties (SEAT (seat), name);
     display_manager_add_seat (display_manager, SEAT (seat));
 }
 
@@ -924,7 +925,7 @@ main (int argc, char **argv)
             }
             if (seat)
             {
-                set_seat_properties (seat, NULL);
+                set_seat_properties (seat, seat_get_name (seat));
                 seat_set_property (seat, "exit-on-failure", "true");
 
                 /* in the absence of login1 we find out this using our own heuristics */
