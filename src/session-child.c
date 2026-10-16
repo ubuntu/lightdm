@@ -198,7 +198,7 @@ read_xauth (void)
 
 /* GNU provides this but we can't rely on that so let's make our own version */
 static void
-updwtmpx (const gchar *wtmp_file, struct utmpx *ut)
+lightdm_updwtmpx (const gchar *wtmp_file, struct utmpx *ut)
 {
     struct utmp u;
     memset (&u, 0, sizeof (u));
@@ -367,7 +367,7 @@ session_child_run (int argc, char **argv)
             ut.ut_tv.tv_sec = tv.tv_sec;
             ut.ut_tv.tv_usec = tv.tv_usec;
 
-            updwtmpx ("/var/log/btmp", &ut);
+            lightdm_updwtmpx ("/var/log/btmp", &ut);
 
 #if HAVE_LIBAUDIT
             audit_event (AUDIT_USER_LOGIN, username, -1, remote_host_name, tty, FALSE);
@@ -759,7 +759,7 @@ session_child_run (int argc, char **argv)
             if (!pututxline (&ut))
                 g_printerr ("Failed to write utmpx: %s\n", strerror (errno));
             endutxent ();
-            updwtmpx ("/var/log/wtmp", &ut);
+            lightdm_updwtmpx ("/var/log/wtmp", &ut);
 
 #if HAVE_LIBAUDIT
             audit_event (AUDIT_USER_LOGIN, username, uid, remote_host_name, tty, TRUE);
@@ -800,7 +800,7 @@ session_child_run (int argc, char **argv)
             if (!pututxline (&ut))
                 g_printerr ("Failed to write utmpx: %s\n", strerror (errno));
             endutxent ();
-            updwtmpx ("/var/log/wtmp", &ut);
+            lightdm_updwtmpx ("/var/log/wtmp", &ut);
 
 #if HAVE_LIBAUDIT
             audit_event (AUDIT_USER_LOGOUT, username, uid, remote_host_name, tty, TRUE);
