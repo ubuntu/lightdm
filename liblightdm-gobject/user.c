@@ -741,6 +741,11 @@ lightdm_user_class_init (LightDMUserClass *klass)
     object_class->get_property = lightdm_user_get_property;
     object_class->finalize = lightdm_user_finalize;
 
+    /**
+     * LightDMUser:common-user: (skip) (type GObject.Object)
+     *
+     * Internal user object.
+     */
     g_object_class_install_property (object_class,
                                      USER_PROP_COMMON_USER,
                                      g_param_spec_object ("common-user",
