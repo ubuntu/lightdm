@@ -1348,11 +1348,17 @@ common_user_get_language (CommonUser *user)
 void
 common_user_set_language (CommonUser *user, const gchar *language)
 {
+    CommonUserPrivate *priv = common_user_get_instance_private (user);
+
     g_return_if_fail (COMMON_IS_USER (user));
     if (g_strcmp0 (common_user_get_language (user), language) != 0)
     {
         call_method (user, "SetLanguage", g_variant_new ("(s)", language), "()", NULL);
         save_string_to_dmrc (user, "Desktop", "Language", language);
+        g_free (priv->language);
+        priv->language = g_strdup (language);
+        if (priv->language && priv->language[0] == '\0')
+            g_clear_pointer (&priv->language, g_free);
     }
 }
 
@@ -1421,11 +1427,20 @@ common_user_get_session (CommonUser *user)
 void
 common_user_set_session (CommonUser *user, const gchar *session)
 {
+    CommonUserPrivate *priv = common_user_get_instance_private (user);
+
     g_return_if_fail (COMMON_IS_USER (user));
+    /* Update the in-memory cache: load_dmrc only runs once when AccountsService
+     * is unavailable, so skipping this left .dmrc stuck after switching away
+     * from the originally loaded session (#325). */
     if (g_strcmp0 (common_user_get_session (user), session) != 0)
     {
         call_method (user, "SetXSession", g_variant_new ("(s)", session), "()", NULL);
         save_string_to_dmrc (user, "Desktop", "Session", session);
+        g_free (priv->session);
+        priv->session = g_strdup (session);
+        if (priv->session && priv->session[0] == '\0')
+            g_clear_pointer (&priv->session, g_free);
     }
 }
 

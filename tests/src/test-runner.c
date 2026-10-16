@@ -801,6 +801,18 @@ handle_command (const gchar *command)
     }
     else if (strcmp (name, "STOP-DAEMON") == 0)
         stop_process (lightdm_process);
+    else if (strcmp (name, "CHECK-DMRC-SESSION") == 0)
+    {
+        const gchar *username = g_hash_table_lookup (params, "USERNAME");
+        g_autofree gchar *path = g_build_filename (g_getenv ("LIGHTDM_TEST_ROOT"), "home", username, ".dmrc", NULL);
+        g_autoptr(GKeyFile) dmrc = g_key_file_new ();
+        g_autofree gchar *session = NULL;
+        if (g_key_file_load_from_file (dmrc, path, G_KEY_FILE_NONE, NULL))
+            session = g_key_file_get_string (dmrc, "Desktop", "Session", NULL);
+        g_autofree gchar *status_text = g_strdup_printf ("RUNNER DMRC-SESSION USERNAME=%s SESSION=%s",
+                                                         username, session ? session : "");
+        check_status (status_text);
+    }
     // FIXME: Make generic RUN-COMMAND
     else if (strcmp (name, "START-XSERVER") == 0)
     {
