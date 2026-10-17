@@ -16,6 +16,7 @@
 #include <utmp.h>
 #include <utmpx.h>
 #include <sys/mman.h>
+#include <sys/time.h>
 #if HAVE_SETUSERCONTEXT
 #include <login_cap.h>
 #endif
