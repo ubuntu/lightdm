@@ -391,7 +391,7 @@ session_child_run (int argc, char **argv)
         user = accounts_get_user_by_name (username);
         if (!user)
         {
-            g_printerr ("Failed to get information on user %s: %s\n", username, strerror (errno));
+            g_printerr ("Failed to get information on user %s: %s\n", username ? username : "(null)", strerror (errno));
             authentication_result = PAM_USER_UNKNOWN;
         }
         else
@@ -639,7 +639,7 @@ session_child_run (int argc, char **argv)
             return EXIT_FAILURE;
         }
 
-        g_autofree gchar *value = g_strdup_printf ("XAUTHORITY=%s", x_authority_filename);
+        g_autofree gchar *value = g_strdup_printf ("XAUTHORITY=%s", x_authority_filename ? x_authority_filename : "(null)");
         pam_putenv (pam_handle, value);
     }
 
