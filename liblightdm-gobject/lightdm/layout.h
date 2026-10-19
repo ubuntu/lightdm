@@ -66,6 +66,8 @@ const gchar *lightdm_layout_get_short_description (LightDMLayout *layout);
 
 const gchar *lightdm_layout_get_description (LightDMLayout *layout);
 
+const gchar *lightdm_layout_get_variant (LightDMLayout *layout);
+
 G_END_DECLS
 
 #endif /* LIGHTDM_LAYOUT_H_ */
