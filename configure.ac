@@ -37,6 +37,8 @@ AC_SUBST(WARN_CFLAGS)
 AC_SUBST(WARN_CXXFLAGS)
 
 GOBJECT_INTROSPECTION_CHECK(0.9.5)
+AC_PATH_PROG([XMLLINT], [xmllint])
+AM_CONDITIONAL([HAVE_XMLLINT], [test -n "$XMLLINT"])
 
 VAPIGEN_CHECK([0.16])
 
@@ -265,6 +267,7 @@ echo "
         Greeter user:             $GREETER_USER
         User session:             $DEFAULT_USER_SESSION
         GObject introspection:    $found_introspection
+        GIR unnamed-type check:  $XMLLINT
         Vala bindings:            $enable_vala
         liblightdm-qt5:           $compile_liblightdm_qt5
         liblightdm-qt6:           $compile_liblightdm_qt6
