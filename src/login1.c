@@ -24,6 +24,7 @@ enum {
     SEAT_ADDED,
     SEAT_REMOVED,
     SEAT_ATTENTION_KEY,
+    PREPARE_FOR_SLEEP,
     LAST_SERVICE_SIGNAL
 };
 static guint service_signals[LAST_SERVICE_SIGNAL] = { 0 };
@@ -256,6 +257,12 @@ signal_cb (GDBusConnection *connection,
             g_signal_emit (service, service_signals[SEAT_ATTENTION_KEY], 0, seat);
         }
 
+    }
+    else if (strcmp (signal_name, "PrepareForSleep") == 0)
+    {
+        gboolean active;
+        g_variant_get (parameters, "(b)", &active);
+        g_signal_emit (service, service_signals[PREPARE_FOR_SLEEP], 0, active);
     }
 }
 
@@ -515,6 +522,14 @@ login1_service_class_init (Login1ServiceClass *klass)
                       NULL, NULL,
                       NULL,
                       G_TYPE_NONE, 1, LOGIN1_SEAT_TYPE);
+    service_signals[PREPARE_FOR_SLEEP] =
+        g_signal_new (LOGIN1_SERVICE_SIGNAL_PREPARE_FOR_SLEEP,
+                      G_TYPE_FROM_CLASS (klass),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (Login1ServiceClass, prepare_for_sleep),
+                      NULL, NULL,
+                      NULL,
+                      G_TYPE_NONE, 1, G_TYPE_BOOLEAN);
 }
 
 const gchar *
