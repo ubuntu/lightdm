@@ -22,11 +22,14 @@
 #ifdef __linux__
 #include <linux/vt.h>
 #endif
+#ifdef __zinnia__
+#include <sys/console.h>
+#endif
 
 #include "vt.h"
 #include "configuration.h"
 
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__zinnia__)
 #define CONSOLE "/dev/console"
 #else
 #define CONSOLE "/dev/tty0"
@@ -46,7 +49,7 @@ open_tty (void)
 gboolean
 vt_can_multi_seat (void)
 {
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__zinnia__)
     return TRUE;
 #elif defined(__linux__)
     /* Quick check to see if we can multi seat.  This is intentionally the
@@ -62,7 +65,7 @@ vt_can_multi_seat (void)
 gint
 vt_get_active (void)
 {
-#if defined(__FreeBSD__)
+#if defined(__FreeBSD__) || defined(__zinnia__)
     int active, res;
     int tty_fd = open_tty ();
 
@@ -103,7 +106,7 @@ vt_get_active (void)
 void
 vt_set_active (gint number)
 {
-#if defined(__FreeBSD__) || defined(__linux__)
+#if defined(__FreeBSD__) || defined(__linux__) || defined(__zinnia__)
     g_debug ("Activating VT %d", number);
 
     /* Pretend always active */
