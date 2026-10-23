@@ -4,6 +4,9 @@ dist_init_DATA = init/lightdm.conf
 confdir = $(sysconfdir)/lightdm
 dist_conf_DATA = lightdm.conf users.conf keys.conf
 
+# Default session-wrapper (see Seat:* session-wrapper / src/lightdm.c).
+dist_sbin_SCRIPTS = lightdm-session
+
 dbusconfdir = $(datadir)/dbus-1/system.d
 dist_dbusconf_DATA = org.freedesktop.DisplayManager.conf
 

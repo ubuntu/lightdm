@@ -70,6 +70,7 @@ TESTS = \
 	test-session-stderr \
 	test-session-stderr-multi-write \
 	test-session-stderr-backup \
+	test-lightdm-session-stderr \
 	test-xauthority \
 	test-corrupt-xauthority \
 	test-system-xauthority \
