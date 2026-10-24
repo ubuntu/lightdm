@@ -9,10 +9,10 @@ We also invite you to join the [LightDM Matrix Room](https://matrix.to/#/#lightd
 - Substantial changes must have associated regression tests. If you are having trouble making a suitable test please propose your change anyway and we'll try and help you write a test or write a test if necessary.
 
 ### Usage of LLMs
-LightDM is a labor of love and is well respected. As such, purely vibe coded or LLM-written material will be rejected
+LightDM is a labor of love and is well respected. As such, purely vibe coded or LLM-written material will be rejected.
 
 We ask that, if you are using an LLM:
-- All code must still be human-made. This includes comments.
+- All code must still be human-made. This includes comments. (If you are taking a snippet of code from a LLM, and you have ensured that the solution is logical and correct, be prepared to defend it. You will be treated as if you wrote the code yourself).
 - You must disclose its usage and how it helped you with your contribution.
 - If you must use an LLM, use it as an **assistant**, not a coding replacement.
 - Explain the changes in _your own_ words, not an LLM. You may use an LLM to help explain your changes from another point of view, but please separate your own writing from the LLM.
