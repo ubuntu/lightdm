@@ -1008,7 +1008,7 @@ configure_session (Session *session, SessionConfig *config, const gchar *session
 }
 
 static Session *
-create_user_session (Seat *seat, const gchar *username, gboolean autostart)
+create_user_session (Seat *seat, const gchar *username, gboolean autostart, const gchar *session_name)
 {
     l_debug (seat, "Creating user session");
 
@@ -1019,8 +1019,11 @@ create_user_session (Seat *seat, const gchar *username, gboolean autostart)
         l_debug (seat, "Can't login unknown user '%s'", username);
         return NULL;
     }
-    const gchar *session_name = user_get_xsession (user);
     const gchar *language = user_get_language (user);
+
+    /* Caller (e.g. dm-tool) may pass an explicit session; otherwise use dmrc / defaults. */
+    if (!session_name || session_name[0] == '\0')
+        session_name = user_get_xsession (user);
 
     /* Override session for autologin if configured */
     if (autostart)
@@ -1030,7 +1033,7 @@ create_user_session (Seat *seat, const gchar *username, gboolean autostart)
             session_name = autologin_session_name;
     }
 
-    if (!session_name)
+    if (!session_name || session_name[0] == '\0')
         session_name = seat_get_string_property (seat, "user-session");
     g_autofree gchar *sessions_dir = config_get_string (config_get_instance (), "LightDM", "sessions-directory");
     g_autoptr(SessionConfig) session_config = find_session_config (seat, sessions_dir, session_name);
@@ -1544,7 +1547,12 @@ seat_switch_to_user (Seat *seat, const gchar *username, const gchar *session_nam
     l_debug (seat, "Switching to user %s", username);
 
     /* Attempt to authenticate them */
-    session = create_user_session (seat, username, FALSE);
+    session = create_user_session (seat, username, FALSE, session_name);
+    if (!session)
+    {
+        l_debug (seat, "Failed to create session for user %s", username);
+        return FALSE;
+    }
     g_signal_connect (session, SESSION_SIGNAL_AUTHENTICATION_COMPLETE, G_CALLBACK (switch_authentication_complete_cb), seat);
     session_set_pam_service (session, seat_get_string_property (seat, "pam-service"));
 
@@ -1718,7 +1726,7 @@ seat_real_start (Seat *seat)
         if (autologin_guest)
             session = create_guest_session (seat, NULL);
         else if (autologin_username != NULL)
-            session = create_user_session (seat, autologin_username, TRUE);
+            session = create_user_session (seat, autologin_username, TRUE, NULL);
 
         if (session)
             session_set_pam_service (session, seat_get_string_property (seat, "pam-autologin-service"));
