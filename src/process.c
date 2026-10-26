@@ -38,14 +38,17 @@ typedef struct
 
     /* File to log to */
     gchar *log_file;
-    gboolean log_stdout;
-    LogMode log_mode;
+    LogMode log_mode; // enum range [-1, 0, 1]
+    gboolean log_stdout : 1; // bool range [0, 1]
+
+    /* TRUE to clear the environment in this process */
+    gboolean clear_environment : 1; // bool range [0, 1]
+
+    /* TRUE if stopping this process (waiting for child process to stop) */
+    gboolean stopping : 1; // bool range [0, 1]
 
     /* Command to run */
     gchar *command;
-
-    /* TRUE to clear the environment in this process */
-    gboolean clear_environment;
 
     /* Environment variables to set */
     GHashTable *env;
@@ -55,9 +58,6 @@ typedef struct
 
     /* Exit status of process */
     int exit_status;
-
-    /* TRUE if stopping this process (waiting for child process to stop) */
-    gboolean stopping;
 
     /* Timeout waiting for process to quit */
     guint quit_timeout;
