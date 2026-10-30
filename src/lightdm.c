@@ -425,11 +425,9 @@ add_login1_seat (Login1Seat *login1_seat)
     {
         set_seat_properties (seat, seat_name);
 
-        gboolean can_multi_session = login1_seat_get_can_multi_session (login1_seat);
         gboolean can_tty = login1_seat_get_can_tty (login1_seat);
-        if (!can_multi_session)
-            g_debug ("Seat %s has property CanMultiSession=no", seat_name);
-        seat_set_supports_multi_session (seat, can_multi_session);
+
+        seat_set_supports_multi_session (seat, TRUE);
         seat_set_can_tty (seat, can_tty);
 
         if (is_seat0)
@@ -551,6 +549,13 @@ login1_service_seat_removed_cb (Login1Service *service, Login1Seat *login1_seat)
     g_signal_handlers_disconnect_matched (login1_seat, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, login1_can_graphical_changed_cb, NULL);
     g_signal_handlers_disconnect_matched (login1_seat, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, login1_active_session_changed_cb, NULL);
     remove_login1_seat (login1_seat);
+}
+
+static void
+login1_service_seat_attention_key_cb (Login1Service *service, Login1Seat *login1_seat)
+{
+   Seat *seat = display_manager_get_seat (display_manager, login1_seat_get_id (login1_seat));
+   seat_switch_to_greeter (seat);
 }
 
 int
@@ -893,6 +898,7 @@ main (int argc, char **argv)
         {
             g_signal_connect (login1_service_get_instance (), LOGIN1_SERVICE_SIGNAL_SEAT_ADDED, G_CALLBACK (login1_service_seat_added_cb), NULL);
             g_signal_connect (login1_service_get_instance (), LOGIN1_SERVICE_SIGNAL_SEAT_REMOVED, G_CALLBACK (login1_service_seat_removed_cb), NULL);
+            g_signal_connect (login1_service_get_instance (), LOGIN1_SERVICE_SIGNAL_SEAT_ATTENTION_KEY, G_CALLBACK (login1_service_seat_attention_key_cb), NULL);
 
             for (GList *link = login1_service_get_seats (login1_service_get_instance ()); link; link = link->next)
             {

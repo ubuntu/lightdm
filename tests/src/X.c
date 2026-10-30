@@ -556,7 +556,7 @@ main (int argc, char **argv)
                 socket_filename = g_strdup_printf ("X%d", display_number);
                 socket_path = g_build_filename (socket_dir, socket_filename, NULL);
 
-                g_printerr ("Breaking lock on non-existant process %d\n", pid);
+                g_printerr ("Breaking lock on non-existent process %d\n", pid);
                 unlink (lock_path);
                 unlink (socket_path);
             }

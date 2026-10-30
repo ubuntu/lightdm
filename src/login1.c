@@ -14,6 +14,7 @@
 #include <gio/gio.h>
 
 #include "login1.h"
+#include "seat.h"
 
 #define LOGIN1_SERVICE_NAME "org.freedesktop.login1"
 #define LOGIN1_OBJECT_NAME "/org/freedesktop/login1"
@@ -22,6 +23,7 @@
 enum {
     SEAT_ADDED,
     SEAT_REMOVED,
+    SEAT_ATTENTION_KEY,
     LAST_SERVICE_SIGNAL
 };
 static guint service_signals[LAST_SERVICE_SIGNAL] = { 0 };
@@ -64,9 +66,6 @@ typedef struct
 
     /* TRUE if can run a graphical display on this seat */
     gboolean can_graphical;
-
-    /* TRUE if can do session switching */
-    gboolean can_multi_session;
 
     /* TRUE if seat has TTYs */
     gboolean can_tty;
@@ -200,8 +199,6 @@ add_seat (Login1Service *service, const gchar *id, const gchar *path)
         {
             if (strcmp (name, "CanGraphical") == 0 && g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN))
                 s_priv->can_graphical = g_variant_get_boolean (value);
-            else if (strcmp (name, "CanMultiSession") == 0 && g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN))
-                s_priv->can_multi_session = g_variant_get_boolean (value);
             else if (strcmp (name, "CanTTY") == 0 && g_variant_is_of_type (value, G_VARIANT_TYPE_BOOLEAN))
                 s_priv->can_tty = g_variant_get_boolean (value);
         }
@@ -247,6 +244,18 @@ signal_cb (GDBusConnection *connection,
             priv->seats = g_list_remove (priv->seats, seat);
             g_signal_emit (service, service_signals[SEAT_REMOVED], 0, seat);
         }
+    }
+    else if (strcmp (signal_name, "SecureAttentionKey") == 0)
+    {
+        const gchar *id, *path;
+        g_variant_get (parameters, "(&s&o)", &id, &path);
+
+        Login1Seat *seat = login1_service_get_seat (service, id);
+        if (seat)
+        {
+            g_signal_emit (service, service_signals[SEAT_ATTENTION_KEY], 0, seat);
+        }
+
     }
 }
 
@@ -498,6 +507,14 @@ login1_service_class_init (Login1ServiceClass *klass)
                       NULL, NULL,
                       NULL,
                       G_TYPE_NONE, 1, LOGIN1_SEAT_TYPE);
+    service_signals[SEAT_ATTENTION_KEY] =
+        g_signal_new (LOGIN1_SERVICE_SIGNAL_SEAT_ATTENTION_KEY,
+                      G_TYPE_FROM_CLASS (klass),
+                      G_SIGNAL_RUN_LAST,
+                      G_STRUCT_OFFSET (Login1ServiceClass, seat_attention_key),
+                      NULL, NULL,
+                      NULL,
+                      G_TYPE_NONE, 1, LOGIN1_SEAT_TYPE);
 }
 
 const gchar *
@@ -514,14 +531,6 @@ login1_seat_get_can_graphical (Login1Seat *seat)
     Login1SeatPrivate *priv = login1_seat_get_instance_private (seat);
     g_return_val_if_fail (seat != NULL, FALSE);
     return priv->can_graphical;
-}
-
-gboolean
-login1_seat_get_can_multi_session (Login1Seat *seat)
-{
-    Login1SeatPrivate *priv = login1_seat_get_instance_private (seat);
-    g_return_val_if_fail (seat != NULL, FALSE);
-    return priv->can_multi_session;
 }
 
 gboolean
