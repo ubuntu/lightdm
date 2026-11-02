@@ -163,6 +163,7 @@ TESTS = \
 	test-switch-to-guest-disabled \
 	test-switch-to-guest-fail-resettable \
 	test-switch-to-user \
+	test-switch-to-user-unknown \
 	test-switch-to-user-disabled \
 	test-switch-to-user-no-password \
 	test-switch-to-user-active \
@@ -578,6 +579,7 @@ EXTRA_DIST = \
 	scripts/switch-to-guest-disabled.conf \
 	scripts/switch-to-guest-fail-resettable.conf \
 	scripts/switch-to-user.conf \
+	scripts/switch-to-user-unknown.conf \
 	scripts/switch-to-users.conf \
 	scripts/switch-to-user-active.conf \
 	scripts/switch-to-user-disabled.conf \
