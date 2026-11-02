@@ -3,6 +3,9 @@ We welcome improvements and bug fixes to LightDM. All changes should be proposed
 
 We also invite you to join the [LightDM Matrix Room](https://matrix.to/#/#lightdm:matrix.org).
 
+## Translations
+Translations are hosted on [Weblate](https://hosted.weblate.org/projects/lightdm/). Use of machine-generated translations is forbidden.
+
 ## Guidelines
 - All participants should follow the [Ubuntu Code of Conduct](https://ubuntu.com/community/docs/ethos/code-of-conduct).
 - If you are fixing a bug, please include steps for how to reproduce the bug.
