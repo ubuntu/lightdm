@@ -8,15 +8,18 @@ msgstr ""
 "Project-Id-Version: lightdm\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-10-30 18:58-0400\n"
-"PO-Revision-Date: 2011-03-09 23:25+0000\n"
-"Last-Translator: Daniel Nylander <yeager@ubuntu.com>\n"
-"Language-Team: Swedish <sv@li.org>\n"
+"PO-Revision-Date: 2026-11-03 13:52+0000\n"
+"Last-Translator: Joshua Peisach <itzswirlz@users.noreply.hosted.weblate.org>"
+"\n"
+"Language-Team: Swedish <https://hosted.weblate.org/projects/lightdm/lightdm/"
+"sv/>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Launchpad-Export-Date: 2013-08-09 05:11+0000\n"
-"X-Generator: Launchpad (build 16723)\n"
+"X-Generator: Weblate 2026.11.1.dev0\n"
+"Plural-Forms: nplurals=2; plural=n != 1;\n"
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:1
 msgid "Set properties of own user"
@@ -40,21 +43,18 @@ msgstr ""
 
 #. Arguments and description for --help test
 #: ../src/lightdm.c:590
-#, fuzzy
 msgid "- Display Manager"
 msgstr ""
-"Användning:\n"
-"  %s - Display Manager"
 
 #. Help string for command line --config flag
 #: ../src/lightdm.c:601
 msgid "Use configuration file"
-msgstr ""
+msgstr "Använd konfigurationsfil"
 
 #. Help string for command line --debug flag
 #: ../src/lightdm.c:604
 msgid "Print debugging messages"
-msgstr ""
+msgstr "Skriv ut felsökningsmeddelanden"
 
 #. Help string for command line --test-mode flag
 #: ../src/lightdm.c:607
@@ -64,7 +64,7 @@ msgstr ""
 #. Help string for command line --pid-file flag
 #: ../src/lightdm.c:610
 msgid "File to write PID into"
-msgstr ""
+msgstr "Fil att skriva PID till"
 
 #. Help string for command line --log-dir flag
 #: ../src/lightdm.c:613
@@ -89,7 +89,7 @@ msgstr ""
 #. Help string for command line --version flag
 #: ../src/lightdm.c:625
 msgid "Show release version"
-msgstr ""
+msgstr "Visa utgåvans version"
 
 #. Text printed out when an unknown command-line argument provided
 #: ../src/lightdm.c:636
