@@ -9,8 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-10-30 18:58-0400\n"
 "PO-Revision-Date: 2026-11-03 13:51+0000\n"
-"Last-Translator: Joshua Peisach <itzswirlz@users.noreply.hosted.weblate.org>"
-"\n"
+"Last-Translator: Priit Jõerüüt <jrthwlate@users.noreply.hosted.weblate.org>\n"
 "Language-Team: Estonian <https://hosted.weblate.org/projects/lightdm/lightdm/"
 "et/>\n"
 "Language: et\n"
@@ -23,83 +22,85 @@ msgstr ""
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:1
 msgid "Set properties of own user"
-msgstr ""
+msgstr "Määra oma konto seadistused"
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:2
 msgid "Authentication is required to set one's own greeter properties."
-msgstr ""
+msgstr "Enda avavaate omaduste seadistamine eeldab autentimist."
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:3
 msgid "Set properties of any user"
-msgstr ""
+msgstr "Määra ükspuha kelle konto seadistused"
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:4
 msgid "Authentication is required to get another user's greeter properties."
-msgstr ""
+msgstr "Ükspuha kelle avavaate omaduste laadimine eeldab autentimist."
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:5
 msgid "Authentication is required to set another user's greeter properties."
-msgstr ""
+msgstr "Ükspuha kelle avavaate omaduste seadistamine eeldab autentimist."
 
 #. Arguments and description for --help test
 #: ../src/lightdm.c:590
 msgid "- Display Manager"
-msgstr ""
+msgstr "- Siselogimishaldur"
 
 #. Help string for command line --config flag
 #: ../src/lightdm.c:601
 msgid "Use configuration file"
-msgstr "Erabili konfigurazio-fitxategia"
+msgstr "Kasuta seadistustefaili"
 
 #. Help string for command line --debug flag
 #: ../src/lightdm.c:604
 msgid "Print debugging messages"
-msgstr "Inprimatu arazketa-mezuak"
+msgstr "Väljasta silumisteateid"
 
 #. Help string for command line --test-mode flag
 #: ../src/lightdm.c:607
 msgid "Run as unprivileged user, skipping things that require root access"
 msgstr ""
+"Käivita tavakasutaja õigustes, jättes vahele toimingud, mis vajavad "
+"juurkasutaja ligipääsu"
 
 #. Help string for command line --pid-file flag
 #: ../src/lightdm.c:610
 msgid "File to write PID into"
-msgstr "PID idatziko den fitxategia"
+msgstr "Faili, kuhu peaks PID teabe kirjutama"
 
 #. Help string for command line --log-dir flag
 #: ../src/lightdm.c:613
 msgid "Directory to write logs to"
-msgstr ""
+msgstr "Kaust, kuhu peaks logid salvestama"
 
 #. Help string for command line --run-dir flag
 #: ../src/lightdm.c:616
 msgid "Directory to store running state"
-msgstr ""
+msgstr "Kaust, kus peaks töötamise oleku salvestama"
 
 #. Help string for command line --cache-dir flag
 #: ../src/lightdm.c:619
 msgid "Directory to cache information"
-msgstr ""
+msgstr "Kaust, kuhu peaks puhverdatud teabe salvestama"
 
 #. Help string for command line --show-config flag
 #: ../src/lightdm.c:622
 msgid "Show combined configuration"
-msgstr ""
+msgstr "Näita kombineeritud seadistusi"
 
 #. Help string for command line --version flag
 #: ../src/lightdm.c:625
 msgid "Show release version"
-msgstr "Erakutsi laguntza-aukerak"
+msgstr "Näita versiooniteavet"
 
 #. Text printed out when an unknown command-line argument provided
 #: ../src/lightdm.c:636
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
-msgstr ""
+msgstr "Kõiki käsureavalikuid näed „%s --help“ võtmega."
 
 #. Text printed out when an unknown command-line argument provided
 #: ../src/dm-tool.c:29
 #, c-format
 msgid ""
 "Run 'dm-tool --help' to see a full list of available command line options."
-msgstr ""
+msgstr "Kõiki käsureavalikuid näed „dm-tool --help“ võtmega."
