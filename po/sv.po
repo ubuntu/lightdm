@@ -8,9 +8,9 @@ msgstr ""
 "Project-Id-Version: lightdm\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-10-30 18:58-0400\n"
-"PO-Revision-Date: 2026-11-03 13:52+0000\n"
-"Last-Translator: Joshua Peisach <itzswirlz@users.noreply.hosted.weblate.org>"
-"\n"
+"PO-Revision-Date: 2026-11-04 17:51+0000\n"
+"Last-Translator: bittin1ddc447d824349b2 "
+"<bittin1ddc447d824349b2@users.noreply.hosted.weblate.org>\n"
 "Language-Team: Swedish <https://hosted.weblate.org/projects/lightdm/lightdm/"
 "sv/>\n"
 "Language: sv\n"
@@ -23,28 +23,34 @@ msgstr ""
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:1
 msgid "Set properties of own user"
-msgstr ""
+msgstr "Ange egenskaper för den egna användaren"
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:2
 msgid "Authentication is required to set one's own greeter properties."
 msgstr ""
+"Autentisering krävs för att ställa in sina egna egenskaper för "
+"välkomsthälsaren."
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:3
 msgid "Set properties of any user"
-msgstr ""
+msgstr "Ange egenskaper för valfri användare"
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:4
 msgid "Authentication is required to get another user's greeter properties."
 msgstr ""
+"Autentisering krävs för att hämta en annan användares "
+"välkomsthälsningsegenskaper."
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:5
 msgid "Authentication is required to set another user's greeter properties."
 msgstr ""
+"Autentisering krävs för att ställa in välkomstskärmsegenskaper för en annan "
+"användare."
 
 #. Arguments and description for --help test
 #: ../src/lightdm.c:590
 msgid "- Display Manager"
-msgstr ""
+msgstr "- Displayhanterare"
 
 #. Help string for command line --config flag
 #: ../src/lightdm.c:601
@@ -60,6 +66,7 @@ msgstr "Skriv ut felsökningsmeddelanden"
 #: ../src/lightdm.c:607
 msgid "Run as unprivileged user, skipping things that require root access"
 msgstr ""
+"Kör som oprivilegierad användare, hoppar över saker som kräver root åtkomst"
 
 #. Help string for command line --pid-file flag
 #: ../src/lightdm.c:610
@@ -69,22 +76,22 @@ msgstr "Fil att skriva PID till"
 #. Help string for command line --log-dir flag
 #: ../src/lightdm.c:613
 msgid "Directory to write logs to"
-msgstr ""
+msgstr "Katalog att skriva loggar till"
 
 #. Help string for command line --run-dir flag
 #: ../src/lightdm.c:616
 msgid "Directory to store running state"
-msgstr ""
+msgstr "Katalog för att lagra körtillstånd"
 
 #. Help string for command line --cache-dir flag
 #: ../src/lightdm.c:619
 msgid "Directory to cache information"
-msgstr ""
+msgstr "Katalog för cacheinformation"
 
 #. Help string for command line --show-config flag
 #: ../src/lightdm.c:622
 msgid "Show combined configuration"
-msgstr ""
+msgstr "Visa kombinerad konfiguration"
 
 #. Help string for command line --version flag
 #: ../src/lightdm.c:625
@@ -96,6 +103,8 @@ msgstr "Visa utgåvans version"
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
+"Kör '%s--help' för att se en fullständig lista över tillgängliga "
+"kommandoradsalternativ."
 
 #. Text printed out when an unknown command-line argument provided
 #: ../src/dm-tool.c:29
@@ -103,3 +112,5 @@ msgstr ""
 msgid ""
 "Run 'dm-tool --help' to see a full list of available command line options."
 msgstr ""
+"Kör 'dm-tool --help' för att se en fullständig lista över tillgängliga "
+"kommandoradsalternativ."
