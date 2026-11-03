@@ -8,9 +8,8 @@ msgstr ""
 "Project-Id-Version: lightdm\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-10-30 18:58-0400\n"
-"PO-Revision-Date: 2026-11-03 13:52+0000\n"
-"Last-Translator: Joshua Peisach <itzswirlz@users.noreply.hosted.weblate.org>"
-"\n"
+"PO-Revision-Date: 2026-11-04 17:51+0000\n"
+"Last-Translator: Quentin PAGÈS <quenti@users.noreply.hosted.weblate.org>\n"
 "Language-Team: Occitan <https://hosted.weblate.org/projects/lightdm/lightdm/"
 "oc/>\n"
 "Language: oc\n"
@@ -23,28 +22,34 @@ msgstr ""
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:1
 msgid "Set properties of own user"
-msgstr ""
+msgstr "Definir las proprietats del pròpri utilizaire"
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:2
 msgid "Authentication is required to set one's own greeter properties."
 msgstr ""
+"L’autentificacion es requerida per definir las proprietats de l’aculhença "
+"d’un utilizaire."
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:3
 msgid "Set properties of any user"
-msgstr ""
+msgstr "Definir las proprietats de tot utilizaire"
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:4
 msgid "Authentication is required to get another user's greeter properties."
 msgstr ""
+"L’autentificacion es requerida per obténer las proprietats de l’aculhença "
+"d’un autre utilizaire."
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:5
 msgid "Authentication is required to set another user's greeter properties."
 msgstr ""
+"L’autentificacion es requerida per definir las proprietats de l’aculhença "
+"d’un autre utilizaire."
 
 #. Arguments and description for --help test
 #: ../src/lightdm.c:590
 msgid "- Display Manager"
-msgstr ""
+msgstr "- Gestionari d’afichatge"
 
 #. Help string for command line --config flag
 #: ../src/lightdm.c:601
@@ -59,7 +64,7 @@ msgstr "Afichar los messatges de desbugatge"
 #. Help string for command line --test-mode flag
 #: ../src/lightdm.c:607
 msgid "Run as unprivileged user, skipping things that require root access"
-msgstr ""
+msgstr "Execucion sens privilègi, passant las causas que demandan un accès root"
 
 #. Help string for command line --pid-file flag
 #: ../src/lightdm.c:610
@@ -69,22 +74,22 @@ msgstr "Fichièr ont escriure los PID"
 #. Help string for command line --log-dir flag
 #: ../src/lightdm.c:613
 msgid "Directory to write logs to"
-msgstr ""
+msgstr "Repertòri ont escriure los jornals"
 
 #. Help string for command line --run-dir flag
 #: ../src/lightdm.c:616
 msgid "Directory to store running state"
-msgstr ""
+msgstr "Repertòri ont gardar los estats d’execucion"
 
 #. Help string for command line --cache-dir flag
 #: ../src/lightdm.c:619
 msgid "Directory to cache information"
-msgstr ""
+msgstr "Repertòri ont metre en cache las informacions"
 
 #. Help string for command line --show-config flag
 #: ../src/lightdm.c:622
 msgid "Show combined configuration"
-msgstr ""
+msgstr "Mostrar las configuracion combinada"
 
 #. Help string for command line --version flag
 #: ../src/lightdm.c:625
@@ -96,6 +101,8 @@ msgstr "Mostrar la version"
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
+"Executar « %s --help » per veire la lista complèta d’opcions de linhas de "
+"comanda disponiblas."
 
 #. Text printed out when an unknown command-line argument provided
 #: ../src/dm-tool.c:29
@@ -103,3 +110,5 @@ msgstr ""
 msgid ""
 "Run 'dm-tool --help' to see a full list of available command line options."
 msgstr ""
+"Executar « dm-tool --help » per veire la lista complèta d’opcions de linhas "
+"de comanda disponiblas."
