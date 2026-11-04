@@ -60,6 +60,13 @@ case "$with_linker" in
         ;;
 esac
 
+dnl Optional unity build (defaults to yes for fast compilation)
+AC_ARG_ENABLE([unity-build],
+    AS_HELP_STRING([--enable-unity-build], [Enable unity build for faster compilation [default=yes]]),
+    [enable_unity_build=$enableval],
+    [enable_unity_build=yes])
+AM_CONDITIONAL(UNITY_BUILD, test "x$enable_unity_build" = "xyes")
+
 GOBJECT_INTROSPECTION_CHECK(0.9.5)
 
 VAPIGEN_CHECK([0.16])
@@ -303,4 +310,5 @@ echo "
         libaudit support:         $use_libaudit
         Enable tests:             $enable_tests
         Linker:                   $with_linker
+        Unity build:              $enable_unity_build
 "

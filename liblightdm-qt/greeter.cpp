@@ -17,7 +17,8 @@
 #include <QtCore/QVariant>
 #include <QtCore/QSettings>
 
-#include <lightdm.h>
+#include <lightdm/greeter.h>
+#include <lightdm/system.h>
 
 using namespace QLightDM;
 
