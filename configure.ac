@@ -217,7 +217,15 @@ dnl Documentation
 dnl ###########################################################################
 
 GTK_DOC_CHECK
-YELP_HELP_INIT
+m4_ifdef([YELP_HELP_INIT], [
+    YELP_HELP_INIT
+    have_yelp=yes
+], [
+    have_yelp=no
+    YELP_HELP_RULES=""
+    AC_SUBST(YELP_HELP_RULES)
+])
+AM_CONDITIONAL(HAVE_YELP, test "x$have_yelp" = "xyes")
 
 dnl ###########################################################################
 dnl Internationalization

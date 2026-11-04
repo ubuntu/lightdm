@@ -3,7 +3,10 @@ SUBDIRS = common liblightdm-gobject liblightdm-qt
 if COMPILE_TESTS
 SUBDIRS += tests
 endif
-SUBDIRS += data po src doc help
+SUBDIRS += data po src doc
+if HAVE_YELP
+SUBDIRS += help
+endif
 
 DISTCHECK_CONFIGURE_FLAGS = --enable-introspection --enable-gtk-doc
 
