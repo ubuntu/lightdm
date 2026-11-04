@@ -16,6 +16,7 @@
 #include <gio/gunixsocketaddress.h>
 
 #include "greeter-socket.h"
+#include "greeter.h"
 
 enum {
     CREATE_GREETER,

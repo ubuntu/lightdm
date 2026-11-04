@@ -19,10 +19,11 @@ G_BEGIN_DECLS
 #define X_AUTHORITY_TYPE (x_authority_get_type())
 #define X_AUTHORITY(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), X_AUTHORITY_TYPE, XAuthority));
 
-typedef struct
+typedef struct XAuthority XAuthority;
+struct XAuthority
 {
     GObject         parent_instance;
-} XAuthority;
+};
 
 typedef struct
 {

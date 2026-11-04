@@ -13,17 +13,19 @@
 #define SEAT_XDMCP_SESSION_H_
 
 #include "seat.h"
-#include "xdmcp-session.h"
 
 G_BEGIN_DECLS
+
+typedef struct XDMCPSession XDMCPSession;
 
 #define SEAT_XDMCP_SESSION_TYPE (seat_xdmcp_session_get_type())
 #define SEAT_XDMCP_SESSION(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), SEAT_XDMCP_SESSION_TYPE, SeatXDMCPSession))
 
-typedef struct
+typedef struct SeatXDMCPSession SeatXDMCPSession;
+struct SeatXDMCPSession
 {
     Seat parent_instance;
-} SeatXDMCPSession;
+};
 
 typedef struct
 {

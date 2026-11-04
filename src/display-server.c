@@ -12,6 +12,8 @@
 #include <config.h>
 
 #include "display-server.h"
+#include "logger.h"
+#include "session.h"
 
 enum {
     READY,

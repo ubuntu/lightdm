@@ -9,8 +9,13 @@
  */
 
 #include <config.h>
+#include <unistd.h>
+#include <gio/gio.h>
 
 #include "display-manager-service.h"
+#include "display-manager.h"
+#include "seat.h"
+#include "session.h"
 
 enum {
     READY,

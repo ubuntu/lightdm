@@ -10,8 +10,11 @@
  */
 
 #include <string.h>
+#include <gio/gio.h>
 
 #include "seat-xvnc.h"
+#include "session.h"
+#include "display-server.h"
 #include "x-server-xvnc.h"
 #include "configuration.h"
 

@@ -16,6 +16,8 @@
 
 G_BEGIN_DECLS
 
+typedef struct _GSocket GSocket;
+
 #define VNC_SERVER_TYPE (vnc_server_get_type())
 #define VNC_SERVER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), VNC_SERVER_TYPE, VNCServer));
 

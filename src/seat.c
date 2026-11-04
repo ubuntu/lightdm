@@ -18,6 +18,12 @@
 #include "guest-account.h"
 #include "greeter-session.h"
 #include "session-config.h"
+#include "display-server.h"
+#include "greeter.h"
+#include "accounts.h"
+#include "process.h"
+#include "session.h"
+#include "logger.h"
 
 enum {
     SESSION_ADDED,

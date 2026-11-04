@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include <glib-object.h>
+#include <glib.h>
 
 typedef void (*StatusRequestFunc)(const gchar *name, GHashTable *params);
 

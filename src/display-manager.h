@@ -14,9 +14,10 @@
 
 #include <glib-object.h>
 
-#include "seat.h"
-
 G_BEGIN_DECLS
+
+typedef struct Seat Seat;
+typedef struct DisplayManager DisplayManager;
 
 #define DISPLAY_MANAGER_TYPE (display_manager_get_type())
 #define DISPLAY_MANAGER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), DISPLAY_MANAGER_TYPE, DisplayManager));
@@ -25,10 +26,10 @@ G_BEGIN_DECLS
 #define DISPLAY_MANAGER_SIGNAL_SEAT_REMOVED "seat-removed"
 #define DISPLAY_MANAGER_SIGNAL_STOPPED      "stopped"
 
-typedef struct
+struct DisplayManager
 {
     GObject parent_instance;
-} DisplayManager;
+};
 
 typedef struct
 {

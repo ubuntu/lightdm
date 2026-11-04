@@ -11,10 +11,12 @@
 #include <config.h>
 
 #include <stdlib.h>
+#include <unistd.h>
 #include <string.h>
 #include <gcrypt.h>
 
 #include "greeter.h"
+#include "accounts.h"
 #include "configuration.h"
 #include "shared-data-manager.h"
 
