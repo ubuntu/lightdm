@@ -24,6 +24,7 @@
 #include "process.h"
 #include "session.h"
 #include "logger.h"
+#include "vt.h"
 
 enum {
     SESSION_ADDED,
@@ -520,11 +521,20 @@ display_server_stopped_cb (DisplayServer *display_server, Seat *seat)
     }
     g_list_free_full (list, g_object_unref);
 
-    if (!priv->stopping)
+    if (!priv->stopping && !priv->session_to_activate)
     {
         /* If we were the active session, switch to a greeter */
         Session *active_session = seat_get_active_session (seat);
-        if (!active_session || session_get_display_server (active_session) == display_server)
+        gboolean is_active = FALSE;
+        if (active_session)
+            is_active = (session_get_display_server (active_session) == display_server);
+        else if (priv->display_servers == NULL)
+            is_active = TRUE;
+        else if (seat_get_can_tty (seat) && display_server_get_vt (display_server) > 0 &&
+                 display_server_get_vt (display_server) == vt_get_active ())
+            is_active = TRUE;
+
+        if (is_active)
         {
             l_debug (seat, "Active display server stopped, starting greeter");
             if (!seat_switch_to_greeter (seat))
@@ -787,6 +797,7 @@ session_stopped_cb (Session *session, Seat *seat)
 
     g_signal_handlers_disconnect_matched (session, G_SIGNAL_MATCH_DATA, 0, 0, NULL, NULL, seat);
     priv->sessions = g_list_remove (priv->sessions, session);
+    gboolean is_active = (session == priv->active_session);
     if (session == priv->active_session)
         g_clear_object (&priv->active_session);
     if (session == priv->next_session)
@@ -868,7 +879,7 @@ session_stopped_cb (Session *session, Seat *seat)
         seat_stop (seat);
     }
     /* If we were the active session, switch to a greeter */
-    else if (!IS_GREETER_SESSION (session) && session == seat_get_active_session (seat))
+    else if (!IS_GREETER_SESSION (session) && is_active && !display_server)
     {
         l_debug (seat, "Active session stopped, starting greeter");
         if (!seat_switch_to_greeter (seat))
