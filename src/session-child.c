@@ -12,6 +12,7 @@
 #include <pwd.h>
 #include <grp.h>
 #include <glib.h>
+#include <gio/gio.h>
 #include <security/pam_appl.h>
 #include <utmp.h>
 #include <utmpx.h>
@@ -28,6 +29,7 @@
 #include "configuration.h"
 #include "session-child.h"
 #include "session.h"
+#include "accounts.h"
 #include "console-kit.h"
 #include "login1.h"
 #include "log-file.h"

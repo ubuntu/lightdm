@@ -27,10 +27,11 @@ G_BEGIN_DECLS
 #define PROCESS_SIGNAL_GOT_SIGNAL "got-signal"
 #define PROCESS_SIGNAL_STOPPED    "stopped"
 
-typedef struct
+typedef struct Process Process;
+struct Process
 {
     GObject parent_instance;
-} Process;
+};
 
 typedef struct
 {

@@ -9,11 +9,9 @@ autoconf
 autoheader
 automake --add-missing --copy --foreign
 
-YELP=`which yelp-build`
-if test -z $YELP; then
-  echo "*** The tools to build the documentation are not found,"
-  echo "    please install the yelp-tools package ***"
-  exit 1
+YELP=`which yelp-build 2>/dev/null`
+if test -z "$YELP"; then
+  echo "*** Note: yelp-tools not found; help documentation will not be built ***"
 fi
 
 if [ -z "$NOCONFIGURE" ]; then

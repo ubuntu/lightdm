@@ -14,10 +14,13 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <unistd.h>
 #include <glib/gstdio.h>
 #include <stdlib.h>
 
 #include "x-server-local.h"
+#include "x-authority.h"
+#include "logger.h"
 #include "configuration.h"
 #include "process.h"
 #include "vt.h"

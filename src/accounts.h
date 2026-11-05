@@ -21,10 +21,11 @@ G_BEGIN_DECLS
 #define USER_TYPE (user_get_type())
 #define USER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), USER_TYPE, User));
 
-typedef struct
+typedef struct User User;
+struct User
 {
     GObject parent_instance;
-} User;
+};
 
 typedef struct
 {

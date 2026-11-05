@@ -12,6 +12,9 @@
 #include <string.h>
 
 #include "seat-local.h"
+#include "session.h"
+#include "display-server.h"
+#include "logger.h"
 #include "configuration.h"
 #include "x-server-local.h"
 #include "wayland-session.h"

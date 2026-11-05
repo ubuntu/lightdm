@@ -13,9 +13,11 @@
 
 #include <glib-object.h>
 
-#include "display-manager.h"
-
 G_BEGIN_DECLS
+
+typedef struct DisplayManager DisplayManager;
+typedef struct Seat Seat;
+typedef struct DisplayManagerService DisplayManagerService;
 
 #define DISPLAY_MANAGER_SERVICE_TYPE (display_manager_service_get_type())
 #define DISPLAY_MANAGER_SERVICE(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), DISPLAY_MANAGER_SERVICE_TYPE, DisplayManagerService));
@@ -24,10 +26,10 @@ G_BEGIN_DECLS
 #define DISPLAY_MANAGER_SERVICE_SIGNAL_ADD_XLOCAL_SEAT "add-xlocal-seat"
 #define DISPLAY_MANAGER_SERVICE_SIGNAL_NAME_LOST       "name-lost"
 
-typedef struct
+struct DisplayManagerService
 {
     GObject parent_instance;
-} DisplayManagerService;
+};
 
 typedef struct
 {

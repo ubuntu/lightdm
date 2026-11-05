@@ -16,6 +16,7 @@
 #include <gio/gunixsocketaddress.h>
 
 #include "greeter-socket.h"
+#include "greeter.h"
 
 enum {
     CREATE_GREETER,
@@ -79,6 +80,31 @@ greeter_connect_cb (GSocket *s, GIOCondition condition, GreeterSocket *socket)
         return G_SOURCE_CONTINUE;
 
     /* Greeter already connected */
+    if (priv->greeter)
+    {
+        gboolean is_connected = TRUE;
+        if (!priv->greeter_socket || g_socket_is_closed (priv->greeter_socket))
+            is_connected = FALSE;
+        else
+        {
+            GIOCondition cond = g_socket_condition_check (priv->greeter_socket, G_IO_IN | G_IO_HUP | G_IO_ERR);
+            if (cond & (G_IO_HUP | G_IO_ERR))
+                is_connected = FALSE;
+            else if (cond & G_IO_IN)
+            {
+                gchar c;
+                GInputVector vec = { &c, 1 };
+                gint flags = G_SOCKET_MSG_PEEK;
+                gssize r = g_socket_receive_message (priv->greeter_socket, NULL, &vec, 1, NULL, NULL, &flags, NULL, NULL);
+                if (r <= 0)
+                    is_connected = FALSE;
+            }
+        }
+
+        if (!is_connected)
+            greeter_disconnected_cb (priv->greeter, socket);
+    }
+
     if (priv->greeter)
     {
         g_socket_close (new_socket, NULL);

@@ -21,10 +21,11 @@ G_BEGIN_DECLS
 #define SESSION_CONFIG_CLASS(klass)   (G_TYPE_CHECK_CLASS_CAST ((klass), SESSION_CONFIG_TYPE, SessionConfigClass))
 #define SESSION_CONFIG_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), SESSION_CONFIG_TYPE, SessionConfigClass))
 
-typedef struct
+typedef struct SessionConfig SessionConfig;
+struct SessionConfig
 {
     GObject parent_instance;
-} SessionConfig;
+};
 
 typedef struct
 {

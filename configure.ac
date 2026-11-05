@@ -19,9 +19,10 @@ if test "x$ac_cv_prog_cc_c99" = xno; then
     AC_MSG_ERROR([$CC does not support '-std=c99'.])
 fi
 
-dnl Enable compile warnings (only supporting GCC)
+dnl Enable compile warnings and optimizations (only supporting GCC)
 if test "x$GCC" = xyes; then
-    WARN_CFLAGS="-Wall \
+    WARN_CFLAGS="-pipe \
+                 -Wall \
                  -Wstrict-prototypes \
                  -Wnested-externs \
                  -Werror=missing-prototypes \
@@ -31,10 +32,40 @@ if test "x$GCC" = xyes; then
                  -Werror=format-security \
                  -Werror=format=2 \
                  -Werror=missing-include-dirs"
-    WARN_CXXFLAGS="-Wall"
+    WARN_CXXFLAGS="-pipe -Wall"
 fi
 AC_SUBST(WARN_CFLAGS)
 AC_SUBST(WARN_CXXFLAGS)
+
+dnl Optional linker selection (only used when explicitly requested by user)
+AC_ARG_WITH([linker],
+    AS_HELP_STRING([--with-linker=ARG], [Use a specific linker (e.g. mold, gold, bfd) [default: system default]]),
+    [with_linker=$withval],
+    [with_linker=default])
+
+case "$with_linker" in
+    mold)
+        LDFLAGS="$LDFLAGS -fuse-ld=mold"
+        ;;
+    gold)
+        LDFLAGS="$LDFLAGS -fuse-ld=gold"
+        ;;
+    bfd)
+        LDFLAGS="$LDFLAGS -fuse-ld=bfd"
+        ;;
+    default|no|"")
+        ;;
+    *)
+        LDFLAGS="$LDFLAGS -fuse-ld=$with_linker"
+        ;;
+esac
+
+dnl Optional unity build (defaults to yes for fast compilation)
+AC_ARG_ENABLE([unity-build],
+    AS_HELP_STRING([--enable-unity-build], [Enable unity build for faster compilation [default=yes]]),
+    [enable_unity_build=$enableval],
+    [enable_unity_build=yes])
+AM_CONDITIONAL(UNITY_BUILD, test "x$enable_unity_build" = "xyes")
 
 GOBJECT_INTROSPECTION_CHECK(0.9.5)
 
@@ -217,7 +248,15 @@ dnl Documentation
 dnl ###########################################################################
 
 GTK_DOC_CHECK
-YELP_HELP_INIT
+m4_ifdef([YELP_HELP_INIT], [
+    YELP_HELP_INIT
+    have_yelp=yes
+], [
+    have_yelp=no
+    YELP_HELP_RULES=""
+    AC_SUBST(YELP_HELP_RULES)
+])
+AM_CONDITIONAL(HAVE_YELP, test "x$have_yelp" = "xyes")
 
 dnl ###########################################################################
 dnl Internationalization
@@ -270,4 +309,6 @@ echo "
         liblightdm-qt6:           $compile_liblightdm_qt6
         libaudit support:         $use_libaudit
         Enable tests:             $enable_tests
+        Linker:                   $with_linker
+        Unity build:              $enable_unity_build
 "

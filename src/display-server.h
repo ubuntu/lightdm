@@ -15,9 +15,7 @@
 #include <glib-object.h>
 
 typedef struct DisplayServer DisplayServer;
-
-#include "logger.h"
-#include "session.h"
+typedef struct Session Session;
 
 G_BEGIN_DECLS
 
