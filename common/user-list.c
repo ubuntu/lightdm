@@ -347,6 +347,13 @@ load_passwd_file (CommonUserList *user_list, gboolean emit_add_signal)
 
     setpwent ();
 
+    GHashTable *existing_users_map = g_hash_table_new (g_str_hash, g_str_equal);
+    for (GList *link = priv->users; link; link = link->next)
+    {
+        CommonUser *u = link->data;
+        g_hash_table_insert (existing_users_map, (gpointer) common_user_get_name (u), u);
+    }
+
     GList *users = NULL, *new_users = NULL, *changed_users = NULL;
     while (TRUE)
     {
@@ -376,33 +383,37 @@ load_passwd_file (CommonUserList *user_list, gboolean emit_add_signal)
 
         CommonUser *user = make_passwd_user (user_list, entry);
 
-        /* Update existing users if have them */
-        GList *link;
-        for (link = priv->users; link; link = link->next)
+        /* Update existing users if have them (O(1) hash lookup) */
+        CommonUser *info = g_hash_table_lookup (existing_users_map, common_user_get_name (user));
+        if (info)
         {
-            CommonUser *info = link->data;
-            if (strcmp (common_user_get_name (info), common_user_get_name (user)) == 0)
-            {
-                if (update_passwd_user (info, common_user_get_real_name (user), common_user_get_home_directory (user), common_user_get_shell (user), common_user_get_image (user)))
-                    changed_users = g_list_insert_sorted (changed_users, info, compare_user);
-                g_object_unref (user);
-                user = info;
-                break;
-            }
+            if (update_passwd_user (info, common_user_get_real_name (user), common_user_get_home_directory (user), common_user_get_shell (user), common_user_get_image (user)))
+                changed_users = g_list_prepend (changed_users, info);
+            g_object_unref (user);
+            user = info;
         }
-        if (!link)
+        else
         {
             /* Only notify once we have loaded the user list */
             if (priv->have_users)
-                new_users = g_list_insert_sorted (new_users, user, compare_user);
+                new_users = g_list_prepend (new_users, user);
         }
-        users = g_list_insert_sorted (users, user, compare_user);
+        users = g_list_prepend (users, user);
     }
+
+    g_hash_table_destroy (existing_users_map);
 
     if (errno != 0)
         g_warning ("Failed to read password database: %s", strerror (errno));
 
     endpwent ();
+
+    /* Sort once using optimal O(N log N) mergesort */
+    users = g_list_sort (users, compare_user);
+    if (new_users)
+        new_users = g_list_sort (new_users, compare_user);
+    if (changed_users)
+        changed_users = g_list_sort (changed_users, compare_user);
 
     /* Use new user list */
     GList *old_users = priv->users;
@@ -425,17 +436,14 @@ load_passwd_file (CommonUserList *user_list, gboolean emit_add_signal)
         g_signal_emit (info, user_signals[CHANGED], 0);
     }
     g_list_free (changed_users);
+
+    GHashTable *current_users_set = g_hash_table_new (g_direct_hash, g_direct_equal);
+    for (GList *link = priv->users; link; link = link->next)
+        g_hash_table_add (current_users_set, link->data);
+
     for (GList *link = old_users; link; link = link->next)
     {
-        /* See if this user is in the current list */
-        GList *new_link;
-        for (new_link = priv->users; new_link; new_link = new_link->next)
-        {
-            if (new_link->data == link->data)
-                break;
-        }
-
-        if (!new_link)
+        if (!g_hash_table_contains (current_users_set, link->data))
         {
             CommonUser *info = link->data;
             g_debug ("User %s removed", common_user_get_name (info));
@@ -443,6 +451,7 @@ load_passwd_file (CommonUserList *user_list, gboolean emit_add_signal)
             g_object_unref (info);
         }
     }
+    g_hash_table_destroy (current_users_set);
     g_list_free (old_users);
 }
 
