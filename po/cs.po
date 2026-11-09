@@ -8,9 +8,8 @@ msgstr ""
 "Project-Id-Version: lightdm\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-10-30 18:58-0400\n"
-"PO-Revision-Date: 2026-11-03 13:51+0000\n"
-"Last-Translator: Joshua Peisach <itzswirlz@users.noreply.hosted.weblate.org>"
-"\n"
+"PO-Revision-Date: 2026-11-10 09:51+0000\n"
+"Last-Translator: Pavel Borecki <pavelbo@users.noreply.hosted.weblate.org>\n"
 "Language-Team: Czech <https://hosted.weblate.org/projects/lightdm/lightdm/"
 "cs/>\n"
 "Language: cs\n"
@@ -18,28 +17,34 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Launchpad-Export-Date: 2013-08-09 05:11+0000\n"
-"X-Generator: Weblate 2026.11.1.dev0\n"
+"X-Generator: Weblate 2026.11.2.dev0\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:1
 msgid "Set properties of own user"
-msgstr ""
+msgstr "Nastavit vlastnosti pro svůj uživatelský účet"
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:2
 msgid "Authentication is required to set one's own greeter properties."
 msgstr ""
+"Pro nastavení vlastností uvítací obrazovky pro svůj vlastní účet je třeba se "
+"ověřit."
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:3
 msgid "Set properties of any user"
-msgstr ""
+msgstr "Nastavit vlastnosti pro libovolného uživatele"
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:4
 msgid "Authentication is required to get another user's greeter properties."
 msgstr ""
+"Pro načtení vlastností uvítací obrazovky pro účet jiného uživatele je třeba "
+"se ověřit."
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:5
 msgid "Authentication is required to set another user's greeter properties."
 msgstr ""
+"Pro nastavení vlastností uvítací obrazovky pro účet jiného uživatele je "
+"třeba se ověřit."
 
 #. Arguments and description for --help test
 #: ../src/lightdm.c:590
@@ -49,53 +54,57 @@ msgstr "- správce přihlášení"
 #. Help string for command line --config flag
 #: ../src/lightdm.c:601
 msgid "Use configuration file"
-msgstr "načíst konfiguraci ze souboru <soubor>"
+msgstr "Použít soubor s nastaveními"
 
 #. Help string for command line --debug flag
 #: ../src/lightdm.c:604
 msgid "Print debugging messages"
-msgstr "zobrazovat ladicí hlášení"
+msgstr "Vypisovat ladící hlášení"
 
 #. Help string for command line --test-mode flag
 #: ../src/lightdm.c:607
 msgid "Run as unprivileged user, skipping things that require root access"
 msgstr ""
+"Spustit jako neprivilegovaný uživatel – přeskočit věci, které vyžadují "
+"přístup na úrovni správce (root)"
 
 #. Help string for command line --pid-file flag
 #: ../src/lightdm.c:610
 msgid "File to write PID into"
-msgstr "název souboru, do kterého bude zapsáno PID"
+msgstr "Soubor do kterého zapsat PID informace"
 
 #. Help string for command line --log-dir flag
 #: ../src/lightdm.c:613
 msgid "Directory to write logs to"
-msgstr ""
+msgstr "Složka do které zapisovat záznamy událostí"
 
 #. Help string for command line --run-dir flag
 #: ../src/lightdm.c:616
 msgid "Directory to store running state"
-msgstr ""
+msgstr "Složka do které ukládat běhový stav"
 
 #. Help string for command line --cache-dir flag
 #: ../src/lightdm.c:619
 msgid "Directory to cache information"
-msgstr ""
+msgstr "Složka do které ukládat mezipaměť informací"
 
 #. Help string for command line --show-config flag
 #: ../src/lightdm.c:622
 msgid "Show combined configuration"
-msgstr ""
+msgstr "Zobrazit kombinovaná nastavení"
 
 #. Help string for command line --version flag
 #: ../src/lightdm.c:625
 msgid "Show release version"
-msgstr "zobrazit verzi"
+msgstr "Zobrazit verzi"
 
 #. Text printed out when an unknown command-line argument provided
 #: ../src/lightdm.c:636
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
+"Všechny předvolby příkazového řádku, které jsou k dispozici, si zobrazíte "
+"spuštěním „%s --help“."
 
 #. Text printed out when an unknown command-line argument provided
 #: ../src/dm-tool.c:29
@@ -103,3 +112,5 @@ msgstr ""
 msgid ""
 "Run 'dm-tool --help' to see a full list of available command line options."
 msgstr ""
+"Všechny předvolby příkazového řádku, které jsou k dispozici, si zobrazíte "
+"spuštěním „dm-tool --help“."
