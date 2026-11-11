@@ -160,16 +160,16 @@ session_data_free (SessionData *data)
     g_free (data);
 }
 
-G_DEFINE_AUTOPTR_CLEANUP_FUNC (SessionData, session_data_free)
-
 static gboolean
 session_timeout_cb (gpointer user_data)
 {
-    g_autoptr(SessionData) data = user_data;
+    SessionData *data = user_data;
     XDMCPServerPrivate *priv = xdmcp_server_get_instance_private (data->server);
+    guint16 id = xdmcp_session_get_id (data->session);
 
-    g_debug ("Timing out unmanaged session %d", xdmcp_session_get_id (data->session));
-    g_hash_table_remove (priv->sessions, GINT_TO_POINTER ((gint) xdmcp_session_get_id (data->session)));
+    data->timeout_source = 0;
+    g_debug ("Timing out unmanaged session %d", id);
+    g_hash_table_remove (priv->sessions, GINT_TO_POINTER ((gint) id));
     return G_SOURCE_REMOVE;
 }
 
