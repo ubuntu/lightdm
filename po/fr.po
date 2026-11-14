@@ -8,15 +8,18 @@ msgstr ""
 "Project-Id-Version: lightdm\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-10-30 18:58-0400\n"
-"PO-Revision-Date: 2011-09-13 08:33+0000\n"
-"Last-Translator: Alexandre Patenaude <Unknown>\n"
-"Language-Team: French <fr@li.org>\n"
+"PO-Revision-Date: 2026-11-03 13:51+0000\n"
+"Last-Translator: Joshua Peisach <itzswirlz@users.noreply.hosted.weblate.org>"
+"\n"
+"Language-Team: French <https://hosted.weblate.org/projects/lightdm/lightdm/"
+"fr/>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Launchpad-Export-Date: 2013-08-09 05:11+0000\n"
-"X-Generator: Launchpad (build 16723)\n"
+"X-Generator: Weblate 2026.11.1.dev0\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:1
 msgid "Set properties of own user"
@@ -40,21 +43,18 @@ msgstr ""
 
 #. Arguments and description for --help test
 #: ../src/lightdm.c:590
-#, fuzzy
 msgid "- Display Manager"
-msgstr ""
-"Utilisation :\n"
-"  %s - Gestionnaire d'affichage"
+msgstr "- Gestionnaire d'affichage"
 
 #. Help string for command line --config flag
 #: ../src/lightdm.c:601
 msgid "Use configuration file"
-msgstr ""
+msgstr "Utiliser le fichier de configuration \"file\""
 
 #. Help string for command line --debug flag
 #: ../src/lightdm.c:604
 msgid "Print debugging messages"
-msgstr ""
+msgstr "Affiche les messages de débogage"
 
 #. Help string for command line --test-mode flag
 #: ../src/lightdm.c:607
@@ -64,7 +64,7 @@ msgstr ""
 #. Help string for command line --pid-file flag
 #: ../src/lightdm.c:610
 msgid "File to write PID into"
-msgstr ""
+msgstr "Fichier \"file\" dans lequel écrire le PID"
 
 #. Help string for command line --log-dir flag
 #: ../src/lightdm.c:613
@@ -89,7 +89,7 @@ msgstr ""
 #. Help string for command line --version flag
 #: ../src/lightdm.c:625
 msgid "Show release version"
-msgstr ""
+msgstr "Affiche la version"
 
 #. Text printed out when an unknown command-line argument provided
 #: ../src/lightdm.c:636

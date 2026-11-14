@@ -8,94 +8,101 @@ msgstr ""
 "Project-Id-Version: lightdm\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-10-30 18:58-0400\n"
-"PO-Revision-Date: 2021-10-01 20:05+0200\n"
-"Last-Translator: Quentin PAGÈS\n"
-"Language-Team: Occitan (post 1500) <oc@li.org>\n"
+"PO-Revision-Date: 2026-11-04 17:51+0000\n"
+"Last-Translator: Quentin PAGÈS <quenti@users.noreply.hosted.weblate.org>\n"
+"Language-Team: Occitan <https://hosted.weblate.org/projects/lightdm/lightdm/"
+"oc/>\n"
 "Language: oc\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "X-Launchpad-Export-Date: 2013-08-09 05:11+0000\n"
-"X-Generator: Poedit 3.0\n"
+"X-Generator: Weblate 2026.11.1.dev0\n"
+"Plural-Forms: nplurals=2; plural=n > 1;\n"
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:1
 msgid "Set properties of own user"
-msgstr ""
+msgstr "Definir las proprietats del pròpri utilizaire"
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:2
 msgid "Authentication is required to set one's own greeter properties."
 msgstr ""
+"L’autentificacion es requerida per definir las proprietats de l’aculhença "
+"d’un utilizaire."
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:3
 msgid "Set properties of any user"
-msgstr ""
+msgstr "Definir las proprietats de tot utilizaire"
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:4
 msgid "Authentication is required to get another user's greeter properties."
 msgstr ""
+"L’autentificacion es requerida per obténer las proprietats de l’aculhença "
+"d’un autre utilizaire."
 
 #: ../data/org.freedesktop.DisplayManager.AccountsService.policy.in.h:5
 msgid "Authentication is required to set another user's greeter properties."
 msgstr ""
+"L’autentificacion es requerida per definir las proprietats de l’aculhença "
+"d’un autre utilizaire."
 
 #. Arguments and description for --help test
 #: ../src/lightdm.c:590
-#, fuzzy
 msgid "- Display Manager"
-msgstr ""
-"Utilizacion :\n"
-"  %s - Display Manager"
+msgstr "- Gestionari d’afichatge"
 
 #. Help string for command line --config flag
 #: ../src/lightdm.c:601
 msgid "Use configuration file"
-msgstr ""
+msgstr "Utilizar lo fichièr de configuracion"
 
 #. Help string for command line --debug flag
 #: ../src/lightdm.c:604
 msgid "Print debugging messages"
-msgstr ""
+msgstr "Afichar los messatges de desbugatge"
 
 #. Help string for command line --test-mode flag
 #: ../src/lightdm.c:607
 msgid "Run as unprivileged user, skipping things that require root access"
-msgstr ""
+msgstr "Execucion sens privilègi, passant las causas que demandan un accès root"
 
 #. Help string for command line --pid-file flag
 #: ../src/lightdm.c:610
 msgid "File to write PID into"
-msgstr ""
+msgstr "Fichièr ont escriure los PID"
 
 #. Help string for command line --log-dir flag
 #: ../src/lightdm.c:613
 msgid "Directory to write logs to"
-msgstr ""
+msgstr "Repertòri ont escriure los jornals"
 
 #. Help string for command line --run-dir flag
 #: ../src/lightdm.c:616
 msgid "Directory to store running state"
-msgstr ""
+msgstr "Repertòri ont gardar los estats d’execucion"
 
 #. Help string for command line --cache-dir flag
 #: ../src/lightdm.c:619
 msgid "Directory to cache information"
-msgstr ""
+msgstr "Repertòri ont metre en cache las informacions"
 
 #. Help string for command line --show-config flag
 #: ../src/lightdm.c:622
 msgid "Show combined configuration"
-msgstr ""
+msgstr "Mostrar las configuracion combinada"
 
 #. Help string for command line --version flag
 #: ../src/lightdm.c:625
 msgid "Show release version"
-msgstr ""
+msgstr "Mostrar la version"
 
 #. Text printed out when an unknown command-line argument provided
 #: ../src/lightdm.c:636
 #, c-format
 msgid "Run '%s --help' to see a full list of available command line options."
 msgstr ""
+"Executar « %s --help » per veire la lista complèta d’opcions de linhas de "
+"comanda disponiblas."
 
 #. Text printed out when an unknown command-line argument provided
 #: ../src/dm-tool.c:29
@@ -103,3 +110,5 @@ msgstr ""
 msgid ""
 "Run 'dm-tool --help' to see a full list of available command line options."
 msgstr ""
+"Executar « dm-tool --help » per veire la lista complèta d’opcions de linhas "
+"de comanda disponiblas."
