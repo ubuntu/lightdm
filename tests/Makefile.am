@@ -102,6 +102,7 @@ TESTS = \
 	test-login-multi-prompt-gobject \
 	test-login-pick-session-gobject \
 	test-login-remember-session-gobject \
+	test-login-remember-original-session \
 	test-login-manual-remember-session-gobject \
 	test-login-previous-session-gobject \
 	test-login-wrong-password-gobject \
@@ -500,6 +501,7 @@ EXTRA_DIST = \
 	scripts/login-pick-session.conf \
 	scripts/login-previous-session.conf \
 	scripts/login-remember-session.conf \
+	scripts/login-remember-original-session.conf \
 	scripts/login-remote-session.conf \
 	scripts/login-session-crash.conf \
 	scripts/login-two-factor.conf \
