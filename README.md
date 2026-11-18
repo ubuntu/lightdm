@@ -20,7 +20,7 @@ The core LightDM project does not provide any greeter with it; you should instal
 
  * [LightDM GTK+ Greeter](https://github.com/Xubuntu/lightdm-gtk-greeter) - a greeter that has moderate requirements (GTK+).
  * [LightDM KDE Greeter](https://invent.kde.org/plasma/lightdm-kde-greeter) - greeter by [KDE](https://kde.org) (Qt)
- * [LXQt Greeter](https://github.com/lxde/lxqt-lightdm-greeter) - greeter used in [LXQt](http://lxqt.org/) (Qt)
+ * [Qt Greeter](https://github.com/surlykke/qt-lightdm-greeter) - greeter formerly used in [LXQt](http://lxqt.org/) (Qt)
  * [Pantheon Greeter](https://github.com/elementary/greeter) - greeter used in [elementary OS](https://elementary.io/) (GTK+/Clutter).
  * [Unity Greeter](https://launchpad.net/unity-greeter) - greeter used in [Unity](https://launchpad.net/unity).
  * [WebKit2 Greeter](https://github.com/antergos/lightdm-webkit2-greeter) - greeter that can be themed using HTML/CSS/Javascript
