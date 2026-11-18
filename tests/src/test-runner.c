@@ -594,6 +594,20 @@ handle_command (const gchar *command)
         const gchar *id = g_hash_table_lookup (params, "ID");
         remove_login1_seat (dbus_conn, id);
     }
+    else if (strcmp (name, "LOGIN1-PREPARE-FOR-SLEEP") == 0)
+    {
+        const gchar *v = g_hash_table_lookup (params, "ACTIVE");
+        gboolean active = v && strcmp (v, "TRUE") == 0;
+        g_autoptr(GError) error = NULL;
+        if (!g_dbus_connection_emit_signal (dbus_conn,
+                                            NULL,
+                                            "/org/freedesktop/login1",
+                                            "org.freedesktop.login1.Manager",
+                                            "PrepareForSleep",
+                                            g_variant_new ("(b)", active),
+                                            &error))
+            g_warning ("Failed to emit PrepareForSleep: %s", error->message);
+    }
     else if (strcmp (name, "LIST-SEATS") == 0)
     {
         g_autoptr(GError) error = NULL;
@@ -1932,6 +1946,9 @@ login1_name_acquired_cb (GDBusConnection *connection,
         "    </signal>"
         "    <signal name='SeatRemoved'>"
         "      <arg name='seat' type='so'/>"
+        "    </signal>"
+        "    <signal name='PrepareForSleep'>"
+        "      <arg name='start' type='b'/>"
         "    </signal>"
         "  </interface>"
         "</node>";

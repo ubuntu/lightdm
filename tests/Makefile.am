@@ -128,6 +128,7 @@ TESTS = \
 	test-script-hooks \
 	test-script-hook-display-setup-fail \
 	test-script-hook-display-setup-missing \
+	test-script-hook-display-setup-resume \
 	test-script-hook-greeter-setup-fail \
 	test-script-hook-greeter-setup-missing \
 	test-script-hook-session-setup-fail \
@@ -544,6 +545,7 @@ EXTRA_DIST = \
 	scripts/script-hooks.conf \
 	scripts/script-hook-display-setup-fail.conf \
 	scripts/script-hook-display-setup-missing.conf \
+	scripts/script-hook-display-setup-resume.conf \
 	scripts/script-hook-greeter-setup-fail.conf \
 	scripts/script-hook-greeter-setup-missing.conf \
 	scripts/script-hook-session-setup-fail.conf \

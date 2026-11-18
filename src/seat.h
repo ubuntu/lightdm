@@ -87,6 +87,9 @@ void seat_set_can_tty (Seat *seat, gboolean can_tty);
 
 gboolean seat_start (Seat *seat);
 
+/* Re-run display-setup-script for ready display servers (e.g. after resume). */
+void seat_run_display_setup_scripts (Seat *seat);
+
 GList *seat_get_sessions (Seat *seat);
 
 void seat_set_active_session (Seat *seat, Session *session);

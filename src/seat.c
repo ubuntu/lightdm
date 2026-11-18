@@ -1338,6 +1338,32 @@ find_session_for_display_server (Seat *seat, DisplayServer *display_server)
     return NULL;
 }
 
+void
+seat_run_display_setup_scripts (Seat *seat)
+{
+    SeatPrivate *priv = seat_get_instance_private (seat);
+    const gchar *script;
+
+    g_return_if_fail (seat != NULL);
+
+    script = seat_get_string_property (seat, "display-setup-script");
+    if (!script)
+        return;
+
+    for (GList *link = priv->display_servers; link; link = link->next)
+    {
+        DisplayServer *display_server = link->data;
+
+        if (!display_server_get_is_ready (display_server) ||
+            display_server_get_is_stopping (display_server))
+            continue;
+
+        l_debug (seat, "Running display setup script %s", script);
+        if (!run_script (seat, display_server, script, NULL, NULL))
+            l_debug (seat, "Display setup script failed");
+    }
+}
+
 static void
 display_server_ready_cb (DisplayServer *display_server, Seat *seat)
 {
