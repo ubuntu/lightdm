@@ -76,15 +76,17 @@ PKG_CHECK_MODULES(GOBJECT, [
 
 PKG_CHECK_MODULES(XCB, [
     xcb
-])    
+])
 
 PKG_CHECK_MODULES(LIBLIGHTDM_GOBJECT, [
     glib-2.0 >= 2.44
     gio-2.0 >= 2.26
     gio-unix-2.0
     gobject-2.0
-    libxklavier
     x11
+    xkbcommon
+    xkbcommon-x11
+    xkbregistry
 ])
 
 AC_ARG_ENABLE(liblightdm-qt5,
