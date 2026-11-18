@@ -1,0 +1,91 @@
+#!/bin/sh
+# Regression test for https://github.com/ubuntu/lightdm/issues/482
+#
+# Profile scripts often write non-fatal messages to stderr. The session wrapper
+# must log that output without invoking a blocking zenity/kdialog warning.
+
+set -eu
+
+if [ -n "${srcdir:-}" ]; then
+    ROOT="${srcdir}/.."
+else
+    ROOT=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
+fi
+WRAPPER="${ROOT}/data/lightdm-session"
+
+if [ ! -f "$WRAPPER" ]; then
+    echo "lightdm-session not found at $WRAPPER" >&2
+    exit 1
+fi
+
+# Guard: shipped wrapper must not invoke the old blocking dialog helpers.
+if grep -E '(^|[[:space:]])(\.|source)[[:space:]]+/usr/lib/lightdm/config-error-dialog\.sh|(^|[[:space:]])(zenity|kdialog)([[:space:]]|$)' "$WRAPPER" >/dev/null; then
+    echo "data/lightdm-session must not invoke config-error-dialog.sh, zenity, or kdialog" >&2
+    exit 1
+fi
+
+TMP=$(mktemp -d)
+trap 'rm -rf "$TMP"' EXIT
+
+export HOME="${TMP}/home"
+mkdir -p "$HOME" "${TMP}/bin"
+
+cat > "${HOME}/.profile" <<'EOF'
+echo "harmless profile noise" >&2
+EOF
+
+cat > "${TMP}/bin/zenity" <<EOF
+#!/bin/sh
+echo "zenity must not be invoked during session start" >&2
+echo called > "${TMP}/dialog-called"
+exit 1
+EOF
+cat > "${TMP}/bin/kdialog" <<EOF
+#!/bin/sh
+echo "kdialog must not be invoked during session start" >&2
+echo called > "${TMP}/dialog-called"
+exit 1
+EOF
+chmod +x "${TMP}/bin/zenity" "${TMP}/bin/kdialog"
+
+for cmd in xrdb setxkbmap xmodmap; do
+    cat > "${TMP}/bin/${cmd}" <<'EOF'
+#!/bin/sh
+exit 0
+EOF
+    chmod +x "${TMP}/bin/${cmd}"
+done
+
+cat > "${TMP}/bin/test-session" <<EOF
+#!/bin/sh
+touch "${TMP}/session-ran"
+EOF
+chmod +x "${TMP}/bin/test-session"
+
+export PATH="${TMP}/bin:/usr/bin:/bin"
+
+# Capture wrapper stderr (includes forwarded profile noise).
+if ! "$WRAPPER" "${TMP}/bin/test-session" >"${TMP}/wrapper-out" 2>"${TMP}/wrapper-err"; then
+    echo "lightdm-session exited non-zero" >&2
+    cat "${TMP}/wrapper-err" >&2
+    exit 1
+fi
+
+if [ -f "${TMP}/dialog-called" ]; then
+    echo "blocking dialog helper was invoked" >&2
+    exit 1
+fi
+
+if [ ! -f "${TMP}/session-ran" ]; then
+    echo "session command was not executed" >&2
+    cat "${TMP}/wrapper-err" >&2
+    exit 1
+fi
+
+if ! grep -F "harmless profile noise" "${TMP}/wrapper-err" >/dev/null; then
+    echo "profile stderr was not forwarded to the session log stream" >&2
+    cat "${TMP}/wrapper-err" >&2
+    exit 1
+fi
+
+exit 0
