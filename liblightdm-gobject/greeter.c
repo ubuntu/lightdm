@@ -409,7 +409,7 @@ read_int (guint8 *message, gsize message_length, gsize *offset)
 {
     if (message_length - *offset < int_length ())
     {
-        g_warning ("Not enough space for int, need %i, got %zi", int_length (), message_length - *offset);
+        g_warning ("Not enough space for int, need %i, got %" G_GSIZE_FORMAT, int_length (), message_length - *offset);
         return 0;
     }
 
@@ -426,7 +426,7 @@ read_string (guint8 *message, gsize message_length, gsize *offset)
     guint32 length = read_int (message, message_length, offset);
     if (message_length - *offset < length)
     {
-        g_warning ("Not enough space for string, need %u, got %zu", length, message_length - *offset);
+        g_warning ("Not enough space for string, need %u, got %" G_GSIZE_FORMAT, length, message_length - *offset);
         return g_strdup ("");
     }
 
@@ -524,7 +524,7 @@ send_message (LightDMGreeter *greeter, guint8 *message, gsize message_length, GE
     if (stated_length != message_length)
     {
         g_set_error (error, LIGHTDM_GREETER_ERROR, LIGHTDM_GREETER_ERROR_COMMUNICATION_ERROR,
-                     "Refusing to write malformed packet to daemon: declared size is %u, but actual size is %zu",
+                     "Refusing to write malformed packet to daemon: declared size is %u, but actual size is %" G_GSIZE_FORMAT,
                      stated_length, message_length);
         return FALSE;
     }
@@ -548,7 +548,7 @@ send_message (LightDMGreeter *greeter, guint8 *message, gsize message_length, GE
         data += n_written;
     }
 
-    g_debug ("Wrote %zi bytes to daemon", message_length);
+    g_debug ("Wrote %" G_GSIZE_FORMAT " bytes to daemon", message_length);
     g_autoptr(GError) flush_error = NULL;
     if (!g_io_channel_flush (priv->to_server_channel, &flush_error))
     {
@@ -859,7 +859,7 @@ recv_message (LightDMGreeter *greeter, gboolean block, guint8 **message, gsize *
             return FALSE;
         }
 
-        g_debug ("Read %zi bytes from daemon", n_read);
+        g_debug ("Read %" G_GSIZE_FORMAT " bytes from daemon", n_read);
 
         priv->n_read += n_read;
     } while (priv->n_read < n_to_read && block);
