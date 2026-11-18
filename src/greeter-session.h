@@ -13,9 +13,10 @@
 #define GREETER_SESSION_H_
 
 #include "session.h"
-#include "greeter.h"
 
 G_BEGIN_DECLS
+
+typedef struct Greeter Greeter;
 
 #define GREETER_SESSION_TYPE           (greeter_session_get_type())
 #define GREETER_SESSION(obj)           (G_TYPE_CHECK_INSTANCE_CAST ((obj), GREETER_SESSION_TYPE, GreeterSession))
@@ -23,10 +24,11 @@ G_BEGIN_DECLS
 #define GREETER_SESSION_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), GREETER_SESSION_TYPE, GreeterSessionClass))
 #define IS_GREETER_SESSION(obj)        (G_TYPE_CHECK_INSTANCE_TYPE ((obj), GREETER_SESSION_TYPE))
 
-typedef struct
+typedef struct GreeterSession GreeterSession;
+struct GreeterSession
 {
     Session parent_instance;
-} GreeterSession;
+};
 
 typedef struct
 {

@@ -14,7 +14,7 @@
 #include <QtCore/QDebug>
 #include <QtGui/QIcon>
 
-#include <lightdm.h>
+#include <lightdm/user.h>
 
 using namespace QLightDM;
 

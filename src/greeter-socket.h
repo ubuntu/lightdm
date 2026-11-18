@@ -13,9 +13,9 @@
 
 #include <glib-object.h>
 
-#include "greeter.h"
-
 G_BEGIN_DECLS
+
+typedef struct Greeter Greeter;
 
 #define GREETER_SOCKET_TYPE           (greeter_socket_get_type())
 #define GREETER_SOCKET(obj)           (G_TYPE_CHECK_INSTANCE_CAST ((obj), GREETER_SOCKET_TYPE, GreeterSocket))
@@ -25,10 +25,11 @@ G_BEGIN_DECLS
 
 #define GREETER_SOCKET_SIGNAL_CREATE_GREETER "create-greeter"
 
-typedef struct
+typedef struct GreeterSocket GreeterSocket;
+struct GreeterSocket
 {
     GObject parent_instance;
-} GreeterSocket;
+};
 
 typedef struct
 {

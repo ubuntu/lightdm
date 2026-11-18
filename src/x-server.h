@@ -14,9 +14,10 @@
 
 #include <glib-object.h>
 #include "display-server.h"
-#include "x-authority.h"
 
 G_BEGIN_DECLS
+
+typedef struct XAuthority XAuthority;
 
 #define X_SERVER_TYPE (x_server_get_type())
 #define X_SERVER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), X_SERVER_TYPE, XServer))
@@ -24,10 +25,11 @@ G_BEGIN_DECLS
 #define X_SERVER_GET_CLASS(obj) (G_TYPE_INSTANCE_GET_CLASS ((obj), X_SERVER_TYPE, XServerClass))
 #define IS_X_SERVER(obj) (G_TYPE_CHECK_INSTANCE_TYPE ((obj), X_SERVER_TYPE))
 
-typedef struct
+typedef struct XServer XServer;
+struct XServer
 {
     DisplayServer parent_instance;
-} XServer;
+};
 
 typedef struct
 {

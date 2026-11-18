@@ -15,17 +15,18 @@
 #include <glib-object.h>
 #include <gio/gio.h>
 
-#include "x-authority.h"
-
 G_BEGIN_DECLS
+
+typedef struct XAuthority XAuthority;
 
 #define XDMCP_SESSION_TYPE (xdmcp_session_get_type())
 #define XDMCP_SESSION(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), XDMCP_SESSION_TYPE, XDMCPSession));
 
-typedef struct
+typedef struct XDMCPSession XDMCPSession;
+struct XDMCPSession
 {
     GObject parent_instance;
-} XDMCPSession;
+};
 
 typedef struct
 {

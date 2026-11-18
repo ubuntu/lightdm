@@ -10,6 +10,7 @@
  */
 
 #include "wayland-session.h"
+#include "session.h"
 #include "vt.h"
 
 typedef struct

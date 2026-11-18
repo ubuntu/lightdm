@@ -12,6 +12,10 @@
 #include <string.h>
 
 #include "seat-xremote.h"
+#include "session.h"
+#include "display-server.h"
+#include "process.h"
+#include "logger.h"
 #include "configuration.h"
 #include "x-server-remote.h"
 

@@ -20,9 +20,13 @@
 #include <fcntl.h>
 #include <sys/stat.h>
 #include <errno.h>
+#include <gio/gio.h>
 
+#include "logger.h"
 #include "configuration.h"
 #include "display-manager.h"
+#include "seat.h"
+#include "session.h"
 #include "display-manager-service.h"
 #include "xdmcp-server.h"
 #include "vnc-server.h"

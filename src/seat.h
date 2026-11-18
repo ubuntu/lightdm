@@ -13,13 +13,13 @@
 #define SEAT_H_
 
 #include <glib-object.h>
-#include "display-server.h"
-#include "greeter-session.h"
-#include "session.h"
-#include "process.h"
-#include "logger.h"
-
 G_BEGIN_DECLS
+
+typedef struct Seat Seat;
+typedef struct DisplayServer DisplayServer;
+typedef struct GreeterSession GreeterSession;
+typedef struct Session Session;
+typedef struct Process Process;
 
 #define SEAT_TYPE           (seat_get_type())
 #define SEAT(obj)           (G_TYPE_CHECK_INSTANCE_CAST ((obj), SEAT_TYPE, Seat))
@@ -31,10 +31,10 @@ G_BEGIN_DECLS
 #define SEAT_SIGNAL_SESSION_REMOVED      "session-removed"
 #define SEAT_SIGNAL_STOPPED              "stopped"
 
-typedef struct
+struct Seat
 {
     GObject parent_instance;
-} Seat;
+};
 
 typedef struct
 {

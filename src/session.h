@@ -24,13 +24,13 @@ typedef enum
     SESSION_TYPE_REMOTE
 } SessionType;
 
-#include "session-config.h"
-#include "display-server.h"
-#include "accounts.h"
-#include "x-authority.h"
-#include "logger.h"
 #include "log-file.h"
-#include "greeter.h"
+
+typedef struct SessionConfig SessionConfig;
+typedef struct DisplayServer DisplayServer;
+typedef struct User User;
+typedef struct XAuthority XAuthority;
+typedef struct Greeter Greeter;
 
 G_BEGIN_DECLS
 
