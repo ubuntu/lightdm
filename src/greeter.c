@@ -879,7 +879,7 @@ read_cb (GIOChannel *source, GIOCondition condition, gpointer data)
     Greeter *greeter = data;
     GreeterPrivate *priv = greeter_get_instance_private (greeter);
 
-    if (condition == G_IO_HUP)
+    if (condition & G_IO_HUP)
     {
         g_debug ("Greeter closed communication channel");
         priv->from_greeter_watch = 0;
