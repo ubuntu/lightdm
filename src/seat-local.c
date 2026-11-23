@@ -18,6 +18,8 @@
 #include "plymouth.h"
 #include "vt.h"
 
+#define PLYMOUTH_GREETER_TIMEOUT_SECONDS 15
+
 typedef struct
 {
     /* X server being used for XDMCP */
@@ -108,8 +110,30 @@ display_server_ready_cb (DisplayServer *display_server, Seat *seat)
 }
 
 static void
+destroy_plymouth_timeout (gpointer data)
+{
+    GSource *source = data;
+    g_source_destroy (source);
+    g_source_unref (source);
+}
+
+static gboolean
+plymouth_greeter_timeout_cb (gpointer data)
+{
+    if (plymouth_get_is_running ())
+    {
+        g_debug ("Timed out waiting for the Wayland greeter to connect");
+        plymouth_quit (FALSE);
+    }
+
+    return G_SOURCE_REMOVE;
+}
+
+static void
 display_server_transition_plymouth_cb (DisplayServer *display_server, Seat *seat)
 {
+    g_object_set_data (G_OBJECT (display_server), "plymouth-timeout", NULL);
+
     /* Quit Plymouth if we didn't do the transition */
     if (plymouth_get_is_running ())
         plymouth_quit (FALSE);
@@ -117,8 +141,19 @@ display_server_transition_plymouth_cb (DisplayServer *display_server, Seat *seat
     g_signal_handlers_disconnect_matched (display_server, G_SIGNAL_MATCH_FUNC, 0, 0, NULL, display_server_transition_plymouth_cb, NULL);
 }
 
+static void
+greeter_connected_plymouth_cb (Greeter *greeter, DisplayServer *display_server)
+{
+    g_object_set_data (G_OBJECT (display_server), "plymouth-timeout", NULL);
+
+    if (plymouth_get_is_running ())
+        plymouth_quit (TRUE);
+
+    g_signal_handlers_disconnect_by_func (greeter, greeter_connected_plymouth_cb, display_server);
+}
+
 static gint
-get_vt (SeatLocal *seat, DisplayServer *display_server)
+get_vt (SeatLocal *seat, DisplayServer *display_server, Greeter *greeter)
 {
     if (strcmp (seat_get_name (SEAT (seat)), "seat0") != 0 || !seat_get_can_tty ( SEAT (seat)))
         return -1;
@@ -131,7 +166,18 @@ get_vt (SeatLocal *seat, DisplayServer *display_server)
         if (active_vt >= vt_get_min ())
         {
             vt = active_vt;
-            g_signal_connect (display_server, DISPLAY_SERVER_SIGNAL_READY, G_CALLBACK (display_server_ready_cb), seat);
+            if (greeter)
+            {
+                g_signal_connect_object (greeter, GREETER_SIGNAL_CONNECTED,
+                                         G_CALLBACK (greeter_connected_plymouth_cb), display_server, 0);
+                GSource *timeout = g_timeout_source_new_seconds (PLYMOUTH_GREETER_TIMEOUT_SECONDS);
+                g_source_set_callback (timeout, plymouth_greeter_timeout_cb, NULL, NULL);
+                g_source_attach (timeout, NULL);
+                g_object_set_data_full (G_OBJECT (display_server), "plymouth-timeout",
+                                        timeout, destroy_plymouth_timeout);
+            }
+            else
+                g_signal_connect (display_server, DISPLAY_SERVER_SIGNAL_READY, G_CALLBACK (display_server_ready_cb), seat);
             g_signal_connect (display_server, DISPLAY_SERVER_SIGNAL_STOPPED, G_CALLBACK (display_server_transition_plymouth_cb), seat);
             plymouth_deactivate ();
         }
@@ -151,7 +197,7 @@ create_x_server (SeatLocal *seat)
 {
     g_autoptr(XServerLocal) x_server = x_server_local_new ();
 
-    gint vt = get_vt (seat, DISPLAY_SERVER (x_server));
+    gint vt = get_vt (seat, DISPLAY_SERVER (x_server), NULL);
     if (vt >= 0)
         x_server_local_set_vt (x_server, vt);
 
@@ -188,15 +234,16 @@ create_x_server (SeatLocal *seat)
 }
 
 static DisplayServer *
-create_wayland_session (SeatLocal *seat)
+create_wayland_session (SeatLocal *seat, Session *session)
 {
-    g_autoptr(WaylandSession) session = wayland_session_new ();
+    g_autoptr(WaylandSession) wayland_session = wayland_session_new ();
+    Greeter *greeter = IS_GREETER_SESSION (session) ? greeter_session_get_greeter (GREETER_SESSION (session)) : NULL;
 
-    gint vt = get_vt (seat, DISPLAY_SERVER (session));
+    gint vt = get_vt (seat, DISPLAY_SERVER (wayland_session), greeter);
     if (vt >= 0)
-        wayland_session_set_vt (session, vt);
+        wayland_session_set_vt (wayland_session, vt);
 
-    return DISPLAY_SERVER (g_steal_pointer (&session));
+    return DISPLAY_SERVER (g_steal_pointer (&wayland_session));
 }
 
 static DisplayServer *
@@ -208,7 +255,7 @@ seat_local_create_display_server (Seat *s, Session *session)
     if (strcmp (session_type, "x") == 0)
         return DISPLAY_SERVER (create_x_server (seat));
     else if (strcmp (session_type, "wayland") == 0)
-        return create_wayland_session (seat);
+        return create_wayland_session (seat, session);
     else
     {
         l_warning (seat, "Can't create unsupported display server '%s'", session_type);

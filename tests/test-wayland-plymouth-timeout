@@ -1,0 +1,2 @@
+#!/bin/sh
+./src/dbus-env ./src/test-runner wayland-plymouth-timeout test-wayland-greeter

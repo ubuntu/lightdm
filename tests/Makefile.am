@@ -253,6 +253,10 @@ TESTS = \
 	test-unity \
 	test-wayland-autologin \
 	test-wayland-greeter \
+	test-wayland-plymouth \
+	test-wayland-plymouth-autologin \
+	test-wayland-plymouth-fail-start \
+	test-wayland-plymouth-timeout \
 	test-wayland-session \
 	test-invalid-seat \
 	test-seatdefaults-still-supported \
@@ -615,6 +619,10 @@ EXTRA_DIST = \
 	scripts/vnc-open-file-descriptors.conf \
 	scripts/wayland-autologin.conf \
 	scripts/wayland-greeter.conf \
+	scripts/wayland-plymouth.conf \
+	scripts/wayland-plymouth-autologin.conf \
+	scripts/wayland-plymouth-fail-start.conf \
+	scripts/wayland-plymouth-timeout.conf \
 	scripts/wayland-session.conf \
 	scripts/xauthority.conf \
 	scripts/xdg-current-desktop.conf \

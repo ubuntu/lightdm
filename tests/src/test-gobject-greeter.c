@@ -503,8 +503,11 @@ main (int argc, char **argv)
         g_signal_connect (lightdm_user_list_get_instance (), LIGHTDM_USER_LIST_SIGNAL_USER_REMOVED, G_CALLBACK (user_removed_cb), NULL);
     }
 
-    status_notify ("%s CONNECT-TO-DAEMON", greeter_id);
-    lightdm_greeter_connect_to_daemon (greeter, NULL, connect_finished, NULL);
+    if (!g_key_file_get_boolean (config, "test-greeter-config", "skip-daemon-connection", NULL))
+    {
+        status_notify ("%s CONNECT-TO-DAEMON", greeter_id);
+        lightdm_greeter_connect_to_daemon (greeter, NULL, connect_finished, NULL);
+    }
 
     g_main_loop_run (loop);
 
