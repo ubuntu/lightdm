@@ -162,7 +162,7 @@ load_sessions_dir (GList *sessions, const gchar *sessions_dir, const gchar *defa
 }
 
 static GList *
-load_sessions (const gchar *sessions_dir)
+load_sessions (const gchar *sessions_dir, gboolean group_by_directory)
 {
     g_auto(GStrv) dirs = g_strsplit (sessions_dir, ":", -1);
     GList *sessions = NULL;
@@ -173,7 +173,10 @@ load_sessions (const gchar *sessions_dir)
         if (dirs[i] != NULL && g_str_has_suffix (dirs[i], "/wayland-sessions") == TRUE)
             default_type = "wayland";
 
-        sessions = load_sessions_dir (sessions, dirs[i], default_type);
+        if (group_by_directory)
+            sessions = g_list_concat (sessions, load_sessions_dir (NULL, dirs[i], default_type));
+        else
+            sessions = load_sessions_dir (sessions, dirs[i], default_type);
     }
 
     return sessions;
@@ -205,8 +208,9 @@ update_sessions (void)
         remote_sessions_dir = value;
     }
 
-    local_sessions = load_sessions (sessions_dir);
-    remote_sessions = load_sessions (remote_sessions_dir);
+    gboolean group_by_directory = config_get_boolean (config_get_instance (), "LightDM", "group-sessions-by-directory");
+    local_sessions = load_sessions (sessions_dir, group_by_directory);
+    remote_sessions = load_sessions (remote_sessions_dir, group_by_directory);
 
     have_sessions = TRUE;
 }

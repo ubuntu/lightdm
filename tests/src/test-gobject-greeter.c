@@ -315,6 +315,12 @@ request_cb (const gchar *name, GHashTable *params)
         }
     }
 
+    else if (strcmp (name, "LOG-SESSION-NAMES") == 0)
+    {
+        for (GList *link = lightdm_get_sessions (); link; link = link->next)
+            status_notify ("%s LOG-SESSION NAME=%s", greeter_id, lightdm_session_get_name (LIGHTDM_SESSION (link->data)));
+    }
+
     else if (strcmp (name, "LOG-SESSIONS") == 0)
     {
         GList *sessions = lightdm_get_sessions ();

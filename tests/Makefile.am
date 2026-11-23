@@ -74,6 +74,9 @@ TESTS = \
 	test-corrupt-xauthority \
 	test-system-xauthority \
 	test-sessions-gobject \
+	test-session-directory-order-reversed \
+	test-session-directory-order \
+	test-session-name-order \
 	test-user-renamed \
 	test-user-renamed-invalid \
 	test-user-name \
@@ -550,6 +553,9 @@ EXTRA_DIST = \
 	scripts/script-hook-session-setup-missing.conf \
 	scripts/seatdefaults-still-supported.conf \
 	scripts/sessions.conf \
+	scripts/session-directory-order-reversed.conf \
+	scripts/session-directory-order.conf \
+	scripts/session-name-order.conf \
 	scripts/session-greeter.conf \
 	scripts/session-greeter-allow-guest.conf \
 	scripts/session-greeter-autologin.conf \
