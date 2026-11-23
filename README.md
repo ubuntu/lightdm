@@ -1,6 +1,7 @@
 # LightDM Display Manager
 [![Test status](https://github.com/ubuntu/lightdm/actions/workflows/test.yaml/badge.svg)](https://github.com/ubuntu/lightdm/actions/workflows/test.yaml)
 [![LightDM questions on AskUbuntu](https://img.shields.io/stackexchange/askubuntu/t/lightdm?color=brightgreen)](https://askubuntu.com/questions/tagged/lightdm)
+[![Translation status](https://hosted.weblate.org/widget/lightdm/lightdm/svg-badge.svg)](https://hosted.weblate.org/engage/lightdm)
 
 LightDM is a lightweight, cross-desktop display manager. A display manager is a daemon that:
 - Runs display servers (e.g. X) where necessary.
@@ -71,3 +72,10 @@ display-setup-script=/usr/share/example_display_setup_script.sh
 ## Questions
 
 [Stack Overflow](http://stackoverflow.com/search?q=lightdm) and [Ask Ubuntu](http://askubuntu.com/search?q=lightdm) are good sites for frequently asked questions.
+
+## Special Thanks
+
+* Weblate for translation hosting
+* All of our contributors
+* All of the distribution packagers
+* You, for checking this project out!
