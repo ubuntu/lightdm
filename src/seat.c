@@ -1007,6 +1007,18 @@ configure_session (Session *session, SessionConfig *config, const gchar *session
     }
 }
 
+static const gchar *
+get_session_wrapper (Seat *seat, SessionConfig *config, const gchar *key, const gchar *wayland_key)
+{
+    if (g_strcmp0 (session_config_get_session_type (config), "wayland") == 0)
+    {
+        const gchar *wrapper = seat_get_string_property (seat, wayland_key);
+        if (wrapper)
+            return wrapper[0] ? wrapper : NULL;
+    }
+    return seat_get_string_property (seat, key);
+}
+
 static Session *
 create_user_session (Seat *seat, const gchar *username, gboolean autostart)
 {
@@ -1044,7 +1056,7 @@ create_user_session (Seat *seat, const gchar *username, gboolean autostart)
     configure_session (session, session_config, session_name, language);
     session_set_username (session, username);
     session_set_do_authenticate (session, TRUE);
-    g_auto(GStrv) argv = get_session_argv (seat, session_config, seat_get_string_property (seat, "session-wrapper"));
+    g_auto(GStrv) argv = get_session_argv (seat, session_config, get_session_wrapper (seat, session_config, "session-wrapper", "wayland-session-wrapper"));
     session_set_argv (session, argv);
 
     return g_steal_pointer (&session);
@@ -1084,8 +1096,8 @@ create_guest_session (Seat *seat, const gchar *session_name)
     configure_session (session, session_config, session_name, NULL);
     session_set_do_authenticate (session, TRUE);
     session_set_is_guest (session, TRUE);
-    g_auto(GStrv) argv = get_session_argv (seat, session_config, seat_get_string_property (seat, "session-wrapper"));
-    const gchar *guest_wrapper = seat_get_string_property (seat, "guest-wrapper");
+    g_auto(GStrv) argv = get_session_argv (seat, session_config, get_session_wrapper (seat, session_config, "session-wrapper", "wayland-session-wrapper"));
+    const gchar *guest_wrapper = get_session_wrapper (seat, session_config, "guest-wrapper", "wayland-guest-wrapper");
     if (guest_wrapper)
     {
         g_autofree gchar *path = g_find_program_in_path (guest_wrapper);
@@ -1188,7 +1200,7 @@ greeter_start_session_cb (Greeter *greeter, SessionType type, const gchar *sessi
         }
 
         configure_session (session, session_config, session_name, language);
-        g_auto(GStrv) argv = get_session_argv (seat, session_config, seat_get_string_property (seat, "session-wrapper"));
+        g_auto(GStrv) argv = get_session_argv (seat, session_config, get_session_wrapper (seat, session_config, "session-wrapper", "wayland-session-wrapper"));
         session_set_argv (session, argv);
     }
 
