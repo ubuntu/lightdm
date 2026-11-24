@@ -48,6 +48,16 @@ LightDM_1_gir_SCANNERFLAGS = --symbol-prefix=lightdm --c-include "lightdm.h"
 LightDM_1_gir_LIBS = liblightdm-gobject-1.la
 LightDM_1_gir_FILES = $(liblightdm_gobject_1_la_SOURCES)
 
+GIR_UNNAMED_TYPE_XPATH = count(//*[local-name()='type' and not(@name)])
+
+if HAVE_XMLLINT
+check-local: LightDM-1.gir
+	@unnamed_type_count="`$(XMLLINT) --xpath \"$(GIR_UNNAMED_TYPE_XPATH)\" LightDM-1.gir`" || \
+		{ echo "Unable to inspect LightDM-1.gir" >&2; exit 1; }; \
+	 test "$$unnamed_type_count" = "0" || \
+		{ echo "LightDM-1.gir contains an unnamed type" >&2; exit 1; }
+endif
+
 girdir = $(datadir)/gir-1.0
 gir_DATA = LightDM-1.gir
 
