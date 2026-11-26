@@ -12,10 +12,12 @@
 #include <config.h>
 
 #include <string.h>
+#include <unistd.h>
 #include <errno.h>
 #include <fcntl.h>
 
 #include "greeter-session.h"
+#include "greeter.h"
 
 typedef struct
 {

@@ -17,6 +17,7 @@
 #include <gio/gio.h>
 
 #include "xdmcp-server.h"
+#include "xdmcp-session.h"
 #include "xdmcp-protocol.h"
 #include "x-authority.h"
 

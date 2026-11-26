@@ -1,5 +1,6 @@
 #include <QLightDM/Greeter>
-#include <QLightDM/UsersModel>
+
+class QModelIndex;
 
 class TestGreeter : public QLightDM::Greeter
 {

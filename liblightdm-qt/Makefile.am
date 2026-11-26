@@ -42,12 +42,26 @@ common_sources = \
 	power.cpp \
 	sessionsmodel.cpp \
 	usersmodel.cpp
+
+if UNITY_BUILD
+liblightdm_qt5_3_la_SOURCES = \
+	liblightdm-qt-unity.cpp \
+	$(liblightdm_qt5_3include_HEADERS)
+liblightdm_qt6_3_la_SOURCES = \
+	liblightdm-qt-unity.cpp \
+	$(liblightdm_qt6_3include_HEADERS)
+else
 liblightdm_qt5_3_la_SOURCES = \
 	$(common_sources) \
 	$(liblightdm_qt5_3include_HEADERS)
 liblightdm_qt6_3_la_SOURCES = \
 	$(common_sources) \
 	$(liblightdm_qt6_3include_HEADERS)
+endif
+
+EXTRA_DIST = \
+	$(common_sources) \
+	liblightdm-qt-unity.cpp
 
 pkgconfigdir = $(libdir)/pkgconfig
 

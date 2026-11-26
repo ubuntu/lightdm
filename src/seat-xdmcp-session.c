@@ -12,6 +12,10 @@
 #include <string.h>
 
 #include "seat-xdmcp-session.h"
+#include "xdmcp-session.h"
+#include "session.h"
+#include "display-server.h"
+#include "x-authority.h"
 #include "x-server-remote.h"
 
 typedef struct

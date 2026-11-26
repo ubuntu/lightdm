@@ -17,6 +17,8 @@
 
 G_BEGIN_DECLS
 
+typedef struct _GSocket GSocket;
+
 #define SEAT_XVNC_TYPE (seat_xvnc_get_type())
 #define SEAT_XVNC(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), SEAT_XVNC_TYPE, SeatXVNC))
 

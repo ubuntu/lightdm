@@ -38,10 +38,11 @@ G_BEGIN_DECLS
 
 #define USER_SIGNAL_CHANGED "changed"
 
-typedef struct
+typedef struct CommonUser CommonUser;
+struct CommonUser
 {
     GObject parent_instance;
-} CommonUser;
+};
 
 typedef struct
 {
@@ -50,10 +51,11 @@ typedef struct
     void (*changed)(CommonUser *user);
 } CommonUserClass;
 
-typedef struct
+typedef struct CommonUserList CommonUserList;
+struct CommonUserList
 {
     GObject parent_instance;
-} CommonUserList;
+};
 
 typedef struct
 {

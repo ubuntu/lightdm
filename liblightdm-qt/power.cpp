@@ -12,7 +12,8 @@
 
 #include "QLightDM/power.h"
 
-#include <lightdm.h>
+#include <glib.h>
+#include <lightdm/power.h>
 
 using namespace QLightDM;
 

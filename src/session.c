@@ -22,6 +22,12 @@
 #include <pwd.h>
 
 #include "session.h"
+#include "session-config.h"
+#include "display-server.h"
+#include "accounts.h"
+#include "x-authority.h"
+#include "greeter.h"
+#include "logger.h"
 #include "configuration.h"
 #include "console-kit.h"
 #include "login1.h"

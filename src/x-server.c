@@ -10,10 +10,14 @@
  */
 
 #include <config.h>
+#include <unistd.h>
 #include <string.h>
 #include <xcb/xcb.h>
 
 #include "x-server.h"
+#include "x-authority.h"
+#include "logger.h"
+#include "session.h"
 #include "configuration.h"
 
 typedef struct

@@ -13,9 +13,10 @@
 #define DMRC_H_
 
 #include <glib.h>
-#include "user-list.h"
-
+ 
 G_BEGIN_DECLS
+
+typedef struct CommonUser CommonUser;
 
 GKeyFile *dmrc_load (CommonUser *user);
 

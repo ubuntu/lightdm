@@ -14,19 +14,20 @@
 
 #include <glib-object.h>
 
-#include "xdmcp-session.h"
-
 G_BEGIN_DECLS
+
+typedef struct XDMCPSession XDMCPSession;
 
 #define XDMCP_SERVER_TYPE (xdmcp_server_get_type())
 #define XDMCP_SERVER(obj) (G_TYPE_CHECK_INSTANCE_CAST ((obj), XDMCP_SERVER_TYPE, XDMCPServer));
 
 #define XDMCP_SERVER_SIGNAL_NEW_SESSION "new-session"
 
-typedef struct
+typedef struct XDMCPServer XDMCPServer;
+struct XDMCPServer
 {
     GObject parent_instance;
-} XDMCPServer;
+};
 
 typedef struct
 {

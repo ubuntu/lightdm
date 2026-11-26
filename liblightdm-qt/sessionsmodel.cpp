@@ -13,7 +13,7 @@
 #include <QtCore/QVariant>
 #include <QtCore/QDebug>
 
-#include <lightdm.h>
+#include <lightdm/session.h>
 
 using namespace QLightDM;
 
