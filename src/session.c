@@ -936,15 +936,13 @@ session_activate (Session *session)
     }
 }
 
-void
-session_stop (Session *session)
+static gboolean
+session_stop_processes(Session *session)
 {
     SessionPrivate *priv = session_get_instance_private (session);
 
-    g_return_if_fail (session != NULL);
-
     if (priv->stopping)
-        return;
+        return TRUE;
     priv->stopping = TRUE;
 
     /* Kill remaining processes in our logind session to avoid them leaking
@@ -966,8 +964,43 @@ session_stop (Session *session)
         gsize n = 0;
         write_data (session, &n, sizeof (n)); // environment
         write_data (session, &n, sizeof (n)); // command
-        return;
+        return TRUE;
     }
+
+    return FALSE;
+}
+
+static void
+session_finish_cb (GPid pid, gint status, gpointer data)
+{
+    Session *session = data;
+    g_return_if_fail (session != NULL);
+
+    session_stop_processes(session);
+
+    // Call default callback
+    session_watch_cb(pid, status, data);
+}
+
+void
+session_wait_for_finish(Session *session)
+{
+    SessionPrivate *priv = session_get_instance_private (session);
+
+    if (priv->child_watch)
+        g_source_remove (priv->child_watch);
+
+    priv->child_watch = g_child_watch_add_full(G_PRIORITY_HIGH, priv->pid, session_finish_cb, session, NULL);
+}
+
+void
+session_stop (Session *session)
+{
+    g_return_if_fail (session != NULL);
+
+    /* If the child was asked to stop cleanly it will exit by itself */
+    if (session_stop_processes (session))
+        return;
 
     return SESSION_GET_CLASS (session)->stop (session);
 }
