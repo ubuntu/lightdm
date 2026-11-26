@@ -771,12 +771,15 @@ handle_command (const gchar *command)
     else if (strcmp (name, "SWITCH-TO-USER") == 0)
     {
         const gchar *username = g_hash_table_lookup (params, "USERNAME");
+        const gchar *session_name = g_hash_table_lookup (params, "SESSION");
+        if (!session_name)
+            session_name = "";
         g_dbus_connection_call (dbus_conn,
                                 "org.freedesktop.DisplayManager",
                                 "/org/freedesktop/DisplayManager/Seat0",
                                 "org.freedesktop.DisplayManager.Seat",
                                 "SwitchToUser",
-                                g_variant_new ("(ss)", username, ""),
+                                g_variant_new ("(ss)", username, session_name),
                                 G_VARIANT_TYPE ("()"),
                                 G_DBUS_CALL_FLAGS_NONE,
                                 G_MAXINT,
