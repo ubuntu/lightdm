@@ -202,11 +202,10 @@ read_data (gchar *data, gsize data_length, gsize *offset, guint16 length, guint8
     if (data_length - *offset < length)
         return FALSE;
 
-    *value = g_malloc0 (length + 1);
-    for (int i = 0; i < length; i++)
-        (*value)[i] = data[*offset + i];
+    *value = g_malloc (length + 1);
+    memcpy (*value, data + *offset, length);
     *offset += length;
-    (*value)[length] = 0;
+    (*value)[length] = '\0';
 
     return TRUE;
 }
@@ -220,26 +219,29 @@ read_string (gchar *data, gsize data_length, gsize *offset, gchar **value)
     return read_data (data, data_length, offset, length, (guint8 **) value);
 }
 
-static gboolean
-write_uint16 (int fd, guint16 value)
+static inline void
+buffer_append_uint16 (GByteArray *buf, guint16 value)
 {
     guint8 v[2];
     v[0] = value >> 8;
     v[1] = value & 0xFF;
-    return write (fd, v, 2) == 2;
+    g_byte_array_append (buf, v, 2);
 }
 
-static gboolean
-write_data (int fd, const guint8 *value, gsize value_length)
+static inline void
+buffer_append_data (GByteArray *buf, const guint8 *value, gsize value_length)
 {
-    return write (fd, value, value_length) == value_length;
+    if (value && value_length > 0)
+        g_byte_array_append (buf, value, value_length);
 }
 
-static gboolean
-write_string (int fd, const gchar *value)
+static inline void
+buffer_append_string (GByteArray *buf, const gchar *value)
 {
-    size_t value_length = strlen (value);
-    return write_uint16 (fd, value_length) && write_data (fd, (guint8 *) value, value_length);
+    size_t value_length = value ? strlen (value) : 0;
+    buffer_append_uint16 (buf, (guint16) value_length);
+    if (value && value_length > 0)
+        g_byte_array_append (buf, (const guint8 *) value, value_length);
 }
 
 gboolean
@@ -285,9 +287,7 @@ x_authority_write (XAuthority *auth, XAuthWriteMode mode, const gchar *filename,
         gboolean address_matches = FALSE;
         if (priv->address_length == a_priv->address_length)
         {
-            guint16 i;
-            for (i = 0; i < priv->address_length && priv->address[i] == a_priv->address[i]; i++);
-            address_matches = i == priv->address_length;
+            address_matches = (memcmp (priv->address, a_priv->address, priv->address_length) == 0);
         }
 
         /* If this record matches, then update or delete it */
@@ -303,18 +303,38 @@ x_authority_write (XAuthority *auth, XAuthWriteMode mode, const gchar *filename,
                 x_authority_set_authorization_data (a, priv->authorization_data, priv->authorization_data_length);
         }
 
-        records = g_list_append (records, g_steal_pointer (&a));
+        records = g_list_prepend (records, g_steal_pointer (&a));
     }
 
     /* If didn't exist, then add a new one */
     if (!matched)
-        records = g_list_append (records, g_object_ref (auth));
+        records = g_list_prepend (records, g_object_ref (auth));
 
-    /* Write records back */
+    records = g_list_reverse (records);
+
+    /* Build binary image in memory buffer */
+    GByteArray *output_buf = g_byte_array_new ();
+    for (GList *link = records; link; link = link->next)
+    {
+        XAuthority *a = link->data;
+        XAuthorityPrivate *a_priv = x_authority_get_instance_private (a);
+
+        buffer_append_uint16 (output_buf, a_priv->family);
+        buffer_append_uint16 (output_buf, a_priv->address_length);
+        buffer_append_data (output_buf, a_priv->address, a_priv->address_length);
+        buffer_append_string (output_buf, a_priv->number);
+        buffer_append_string (output_buf, a_priv->authorization_name);
+        buffer_append_uint16 (output_buf, a_priv->authorization_data_length);
+        buffer_append_data (output_buf, a_priv->authorization_data, a_priv->authorization_data_length);
+    }
+    g_list_free_full (records, g_object_unref);
+
+    /* Write records back in a single atomic I/O write */
     errno = 0;
-    int output_fd = g_open (filename, O_WRONLY | O_CREAT | O_TRUNC , S_IRUSR | S_IWUSR);
+    int output_fd = g_open (filename, O_WRONLY | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     if (output_fd < 0)
     {
+        g_byte_array_free (output_buf, TRUE);
         g_set_error (error,
                      G_FILE_ERROR,
                      g_file_error_from_errno (errno),
@@ -325,21 +345,9 @@ x_authority_write (XAuthority *auth, XAuthWriteMode mode, const gchar *filename,
     }
 
     errno = 0;
-    gboolean result = TRUE;
-    for (GList *link = records; link && result; link = link->next)
-    {
-        XAuthority *a = link->data;
-        XAuthorityPrivate *a_priv = x_authority_get_instance_private (a);
-
-        result = write_uint16 (output_fd, a_priv->family) &&
-                 write_uint16 (output_fd, a_priv->address_length) &&
-                 write_data (output_fd, a_priv->address, a_priv->address_length) &&
-                 write_string (output_fd, a_priv->number) &&
-                 write_string (output_fd, a_priv->authorization_name) &&
-                 write_uint16 (output_fd, a_priv->authorization_data_length) &&
-                 write_data (output_fd, a_priv->authorization_data, a_priv->authorization_data_length);
-    }
-    g_list_free_full (records, g_object_unref);
+    ssize_t written = write (output_fd, output_buf->data, output_buf->len);
+    gboolean result = (written == (ssize_t) output_buf->len);
+    g_byte_array_free (output_buf, TRUE);
 
     fsync (output_fd);
     close (output_fd);

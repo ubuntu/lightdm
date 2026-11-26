@@ -54,20 +54,34 @@ static void
 read_data (PacketReader *reader, XDMCPData *data)
 {
     data->length = read_card16 (reader);
+    if (reader->overflow || reader->remaining < data->length)
+    {
+        reader->overflow = TRUE;
+        data->data = NULL;
+        return;
+    }
     data->data = g_malloc (sizeof (guint8) * data->length);
-    for (guint16 i = 0; i < data->length; i++)
-        data->data[i] = read_card8 (reader);
+    if (data->length > 0)
+        memcpy (data->data, reader->data, data->length);
+    reader->data += data->length;
+    reader->remaining -= data->length;
 }
 
 static gchar *
 read_string (PacketReader *reader)
 {
     guint16 length = read_card16 (reader);
+    if (reader->overflow || reader->remaining < length)
+    {
+        reader->overflow = TRUE;
+        return g_strdup ("");
+    }
     gchar *string = g_malloc (sizeof (gchar) * (length + 1));
-    guint16 i;
-    for (i = 0; i < length; i++)
-        string[i] = (gchar) read_card8 (reader);
-    string[i] = '\0';
+    if (length > 0)
+        memcpy (string, reader->data, length);
+    string[length] = '\0';
+    reader->data += length;
+    reader->remaining -= length;
 
     return string;
 }
@@ -109,33 +123,62 @@ write_card8 (PacketWriter *writer, guint8 value)
 static void
 write_card16 (PacketWriter *writer, guint16 value)
 {
-    write_card8 (writer, value >> 8);
-    write_card8 (writer, value & 0xFF);
+    if (writer->remaining < 2)
+    {
+        writer->overflow = TRUE;
+        return;
+    }
+    writer->data[0] = (value >> 8) & 0xFF;
+    writer->data[1] = value & 0xFF;
+    writer->data += 2;
+    writer->remaining -= 2;
 }
 
 static void
 write_card32 (PacketWriter *writer, guint32 value)
 {
-    write_card8 (writer, (value >> 24) & 0xFF);
-    write_card8 (writer, (value >> 16) & 0xFF);
-    write_card8 (writer, (value >> 8) & 0xFF);
-    write_card8 (writer, value & 0xFF);
+    if (writer->remaining < 4)
+    {
+        writer->overflow = TRUE;
+        return;
+    }
+    writer->data[0] = (value >> 24) & 0xFF;
+    writer->data[1] = (value >> 16) & 0xFF;
+    writer->data[2] = (value >> 8) & 0xFF;
+    writer->data[3] = value & 0xFF;
+    writer->data += 4;
+    writer->remaining -= 4;
 }
 
 static void
 write_data (PacketWriter *writer, const XDMCPData *value)
 {
     write_card16 (writer, value->length);
-    for (guint16 i = 0; i < value->length; i++)
-        write_card8 (writer, value->data[i]);
+    if (writer->overflow || writer->remaining < value->length)
+    {
+        writer->overflow = TRUE;
+        return;
+    }
+    if (value->length > 0 && value->data != NULL)
+        memcpy (writer->data, value->data, value->length);
+    writer->data += value->length;
+    writer->remaining -= value->length;
 }
 
 static void
 write_string (PacketWriter *writer, const gchar *value)
 {
-    write_card16 (writer, strlen (value));
-    for (const gchar *c = value; *c; c++)
-        write_card8 (writer, *c);
+    size_t length = value ? strlen (value) : 0;
+    write_card16 (writer, (guint16) length);
+    if (writer->overflow || writer->remaining < length)
+    {
+        writer->overflow = TRUE;
+        return;
+    }
+    if (length > 0)
+        memcpy (writer->data, value, length);
+    writer->data += length;
+    writer->remaining -= length;
 }
 
 static void
