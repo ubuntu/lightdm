@@ -376,8 +376,10 @@ config_init (Configuration *config)
     g_hash_table_insert (config->priv->seat_keys, "allow-guest", GINT_TO_POINTER (KEY_SUPPORTED));
     g_hash_table_insert (config->priv->seat_keys, "guest-session", GINT_TO_POINTER (KEY_SUPPORTED));
     g_hash_table_insert (config->priv->seat_keys, "session-wrapper", GINT_TO_POINTER (KEY_SUPPORTED));
+    g_hash_table_insert (config->priv->seat_keys, "wayland-session-wrapper", GINT_TO_POINTER (KEY_SUPPORTED));
     g_hash_table_insert (config->priv->seat_keys, "greeter-wrapper", GINT_TO_POINTER (KEY_SUPPORTED));
     g_hash_table_insert (config->priv->seat_keys, "guest-wrapper", GINT_TO_POINTER (KEY_SUPPORTED));
+    g_hash_table_insert (config->priv->seat_keys, "wayland-guest-wrapper", GINT_TO_POINTER (KEY_SUPPORTED));
     g_hash_table_insert (config->priv->seat_keys, "display-setup-script", GINT_TO_POINTER (KEY_SUPPORTED));
     g_hash_table_insert (config->priv->seat_keys, "display-stopped-script", GINT_TO_POINTER (KEY_SUPPORTED));
     g_hash_table_insert (config->priv->seat_keys, "greeter-setup-script", GINT_TO_POINTER (KEY_SUPPORTED));

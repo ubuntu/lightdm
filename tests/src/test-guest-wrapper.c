@@ -10,7 +10,7 @@ main (int argc, char **argv)
 
     const gchar *display = getenv ("DISPLAY");
     if (display == NULL)
-        status_notify ("GUEST-WRAPPER-? START");
+        status_notify ("GUEST-WRAPPER-NO-DISPLAY START");
     else if (display[0] == ':')
         status_notify ("GUEST-WRAPPER-X-%s START", display + 1);
     else

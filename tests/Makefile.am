@@ -252,6 +252,7 @@ TESTS = \
 	test-mir-session \
 	test-unity \
 	test-wayland-autologin \
+	test-wayland-guest-wrapper \
 	test-wayland-greeter \
 	test-wayland-session \
 	test-invalid-seat \
@@ -614,6 +615,7 @@ EXTRA_DIST = \
 	scripts/vnc-login.conf \
 	scripts/vnc-open-file-descriptors.conf \
 	scripts/wayland-autologin.conf \
+	scripts/wayland-guest-wrapper.conf \
 	scripts/wayland-greeter.conf \
 	scripts/wayland-session.conf \
 	scripts/xauthority.conf \
