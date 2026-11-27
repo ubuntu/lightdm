@@ -343,6 +343,7 @@ config_init (Configuration *config)
     g_hash_table_insert (config->priv->lightdm_keys, "cache-directory", GINT_TO_POINTER (KEY_SUPPORTED));
     g_hash_table_insert (config->priv->lightdm_keys, "sessions-directory", GINT_TO_POINTER (KEY_SUPPORTED));
     g_hash_table_insert (config->priv->lightdm_keys, "remote-sessions-directory", GINT_TO_POINTER (KEY_SUPPORTED));
+    g_hash_table_insert (config->priv->lightdm_keys, "group-sessions-by-directory", GINT_TO_POINTER (KEY_SUPPORTED));
     g_hash_table_insert (config->priv->lightdm_keys, "greeters-directory", GINT_TO_POINTER (KEY_SUPPORTED));
     g_hash_table_insert (config->priv->lightdm_keys, "backup-logs", GINT_TO_POINTER (KEY_SUPPORTED));
     g_hash_table_insert (config->priv->lightdm_keys, "dbus-service", GINT_TO_POINTER (KEY_SUPPORTED));
