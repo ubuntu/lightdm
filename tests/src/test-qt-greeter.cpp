@@ -121,8 +121,6 @@ signal_cb (int signum)
 static void
 request_cb (const gchar *name, GHashTable *params)
 {
-    gchar *r;
-
     if (!name)
     {
         app->quit ();
